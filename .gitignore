@@ -1,6 +1,7 @@
 # Build files
 build/
 bin/
+out/
 *.o
 *.a
 *.so
@@ -9,10 +10,12 @@ bin/
 
 # IDE-specific files
 .vscode/
+.vs/
 .idea/
 *.sln
 *.vcxproj*
 *.user
+CMakeSettings.json
 
 # CMake files
 CMakeCache.txt
