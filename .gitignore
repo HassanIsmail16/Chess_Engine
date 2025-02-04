@@ -1,11 +1,9 @@
 # Build files
 build/
-bin/
 out/
 *.o
 *.a
 *.so
-*.dll
 *.exe
 
 # IDE-specific files
