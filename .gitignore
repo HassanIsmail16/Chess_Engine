@@ -24,3 +24,4 @@ Makefile
 # Logs and temp files
 *.log
 *.tmp
+!/lib/
