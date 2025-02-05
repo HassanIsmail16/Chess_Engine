@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
 project(Chess)
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
@@ -19,7 +18,23 @@ target_include_directories(Chess PRIVATE ${SFML_INCLUDE_DIR})
 
 # link SFML libraries
 target_link_directories(Chess PRIVATE ${SFML_LIB_DIR})
-target_link_libraries(Chess PRIVATE sfml-system sfml-window sfml-graphics)
+
+# Debug postfix for Windows
+if(WIN32)
+    set(SFML_DEBUG_POSTFIX "-d")
+endif()
+
+# link appropriate libraries based on build type
+target_link_libraries(Chess PRIVATE
+    debug sfml-system${SFML_DEBUG_POSTFIX}
+    debug sfml-window${SFML_DEBUG_POSTFIX}
+    debug sfml-graphics${SFML_DEBUG_POSTFIX}
+    debug sfml-audio${SFML_DEBUG_POSTFIX}
+    optimized sfml-system
+    optimized sfml-window
+    optimized sfml-graphics
+    optimized sfml-audio
+)
 
 # copy SFML DLLs into build directory (windows only)
 if(WIN32 AND EXISTS "${SFML_ROOT}/bin")
@@ -27,3 +42,19 @@ if(WIN32 AND EXISTS "${SFML_ROOT}/bin")
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${SFML_ROOT}/bin" $<TARGET_FILE_DIR:Chess>)
 endif()
+
+# copy assets into build directory
+set(ASSETS_DIR "${CMAKE_SOURCE_DIR}/assets")
+if(EXISTS ${ASSETS_DIR})
+    add_custom_command(TARGET Chess POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${ASSETS_DIR} $<TARGET_FILE_DIR:Chess>/assets)
+    message(STATUS "Assets directory will be copied to build directory")
+else()
+    message(WARNING "Assets directory not found at: ${ASSETS_DIR}")
+endif()
+
+# debug output to verify SFML paths
+message(STATUS "SFML_ROOT: ${SFML_ROOT}")
+message(STATUS "SFML_INCLUDE_DIR: ${SFML_INCLUDE_DIR}")
+message(STATUS "SFML_LIB_DIR: ${SFML_LIB_DIR}")
