@@ -13,6 +13,9 @@ file(GLOB SRC_FILES "src/*.cpp")
 file(GLOB HEADER_FILES "src/*.h")
 add_executable(Chess ${SRC_FILES} ${HEADER_FILES})
 
+# Ensure CMake re-runs if a new file is added
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
 # include SFML headers
 target_include_directories(Chess PRIVATE ${SFML_INCLUDE_DIR})
 

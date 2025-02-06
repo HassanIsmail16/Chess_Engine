@@ -19,6 +19,7 @@ int main() {
     assets.loadAssets("assets/images/");
     assets.loadAssets("assets/fonts/");
     assets.loadAssets("assets/sounds/");
+    assets.loadAssets("assets/test/");
 
     // Retrieve Asset
     sf::Sprite test = assets.getSprite("king-w");

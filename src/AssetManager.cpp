@@ -6,6 +6,11 @@ AssetManager& AssetManager::getInstance() {
 }
 
 void AssetManager::loadAssets(const std::string& directory_name) {
+	if (!std::filesystem::exists(directory_name)) {
+		std::cerr << "Error: Directory doesn't exist, failed to load assets from: " << directory_name << '\n';
+		return;
+	}
+
 	for (const auto& file : std::filesystem::directory_iterator(directory_name)) {
 		if (file.is_regular_file()) {
 			// Extract file information
