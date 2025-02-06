@@ -1,7 +1,7 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <stack>
-#include <src/State.h>
+#include "State.h"
 
 class StateManager {
 public:
