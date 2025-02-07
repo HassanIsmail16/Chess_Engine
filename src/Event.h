@@ -1,8 +1,14 @@
 #pragma once
+#include <memory>
+#include "State.h"
+#include "MainMenuState.h"
+#include "GamePlayState.h"
 
 enum class EventType {
 	GameStartEvent,
-	ExitMainMenuEvent
+	EnterMainMenuEvent,
+	ExitCurrentStateEvent,
+	ReplaceCurrentStateEvent
 };
 
 class Event {
@@ -18,4 +24,25 @@ public:
 private:
 	EventType type;
 	bool handled = false;
+};
+
+class GameStartEvent : public Event {
+public:
+	GameStartEvent() : Event(EventType::GameStartEvent) {}
+};
+
+class EnterMainMenuEvent : public Event {
+public:
+	EnterMainMenuEvent() : Event(EventType::EnterMainMenuEvent) {}
+};
+
+class ExitCurrentStateEvent : public Event {
+public:
+	ExitCurrentStateEvent() : Event(EventType::ExitCurrentStateEvent) {}
+};
+
+class ReplaceCurrentStateEvent : public Event {
+public:
+	ReplaceCurrentStateEvent(std::unique_ptr<State> new_state) : Event(EventType::ReplaceCurrentStateEvent), new_state(std::move(new_state)) {}
+	std::unique_ptr<State> new_state;
 };

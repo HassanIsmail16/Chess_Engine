@@ -1,4 +1,6 @@
 #include "MainMenuState.h"
+#include "EventDispatcher.h"
+#include "StateForward.h"
 
 void MainMenuState::run(const float& dt, sf::RenderWindow& window, const InputManager& input_manager) {
 	update(dt);
@@ -24,8 +26,12 @@ void MainMenuState::render(sf::RenderWindow& window) {
 }
 
 void MainMenuState::handleInput(const InputManager& input_manager) {
+	// testing state transitions
 	if (input_manager.isKeyJustPressed(sf::Keyboard::Key::Enter)) {
-		EventDispatcher::getInstance().pushEvent(std::make_shared<Event>(EventType::ExitMainMenuEvent));
-		EventDispatcher::getInstance().pushEvent(std::make_shared<Event>(EventType::GameStartEvent));
+		EventDispatcher::getInstance().pushEvent(
+			std::make_shared<ReplaceCurrentStateEvent>(
+				std::make_unique<GamePlayState>()
+			)
+		);
 	}
 }

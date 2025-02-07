@@ -1,6 +1,5 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include "EventDispatcher.h"
 #include "InputManager.h"
 #include "AssetManager.h"
 

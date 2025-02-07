@@ -5,6 +5,7 @@
 #include "EventDispatcher.h"
 #include "StateManager.h"
 #include "MainMenuState.h"
+#include "GamePlayState.h"
 
 int main() {
     // Updated RenderWindow constructor
@@ -15,6 +16,16 @@ int main() {
 
     StateManager manager;
     manager.pushNewState(std::make_unique<MainMenuState>());
+
+    auto& disp = EventDispatcher::getInstance();
+
+    // testing state transitions
+    disp.subscribe(EventType::ReplaceCurrentStateEvent, [&manager](std::shared_ptr<Event> event) {
+        auto state_replacement_event = std::dynamic_pointer_cast<ReplaceCurrentStateEvent>(event);
+        auto& new_state = state_replacement_event->new_state;
+        manager.transitionTo(std::move(new_state));
+        });
+
     // Create a shape (no change here)
     sf::CircleShape shape(100.0f);
     shape.setFillColor(sf::Color::Green);
@@ -45,6 +56,7 @@ int main() {
         }
         
         manager.getCurrentState()->run(0, window, input);
+        disp.processEvents();
         input.endFrame();
     }
 
