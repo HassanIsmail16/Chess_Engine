@@ -11,6 +11,7 @@ StateManager::StateManager() {
 
 void StateManager::pushNewState(std::unique_ptr<State> new_state) {
 	states.push(std::move(new_state));
+	std::string new_state_name = "main menu";
 }
 
 void StateManager::removeCurrentState() {

@@ -3,6 +3,7 @@
 #include <stack>
 #include "State.h"
 #include "../events/EventDispatcher.h"
+#include "../log/Logger.hpp"
 
 class StateManager {
 public:

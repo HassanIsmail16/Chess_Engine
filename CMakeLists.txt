@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 project(Chess)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # SFML path
@@ -10,7 +10,7 @@ set(SFML_LIB_DIR "${SFML_ROOT}/lib")
 
 # collect source files
 file(GLOB_RECURSE SRC_FILES "src/*.cpp")
-file(GLOB_RECURSE HEADER_FILES "src/*.h")
+file(GLOB_RECURSE HEADER_FILES "src/*.h" "src/*.hpp")
 
 # add executable
 add_executable(Chess ${SRC_FILES} ${HEADER_FILES})
@@ -58,6 +58,11 @@ if(EXISTS ${ASSETS_DIR})
 else()
     message(WARNING "Assets directory not found at: ${ASSETS_DIR}")
 endif()
+
+# ensure the logs directory is created in the executable's directory
+add_custom_command(TARGET Chess POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:Chess>/logs
+)
 
 # debug output to verify SFML paths
 message(STATUS "SFML_ROOT: ${SFML_ROOT}")
