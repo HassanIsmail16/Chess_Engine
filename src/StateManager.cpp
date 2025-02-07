@@ -17,11 +17,11 @@ void StateManager::transitionTo(std::unique_ptr<State> new_state) {
 
 	removeCurrentState();
 	pushNewState(std::move(new_state));
-	State* current_state = getCurrentState();
+	//State* current_state = getCurrentState();
 
-	if (current_state != nullptr) {
-		current_state->run();
-	}
+	//if (current_state != nullptr) {
+		//current_state->run();
+	//}
 }
 
 State* StateManager::getCurrentState() {

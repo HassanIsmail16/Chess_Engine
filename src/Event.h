@@ -1,7 +1,8 @@
 #pragma once
 
 enum class EventType {
-	GameStartEvent
+	GameStartEvent,
+	ExitMainMenuEvent
 };
 
 class Event {

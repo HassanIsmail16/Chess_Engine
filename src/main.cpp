@@ -3,6 +3,8 @@
 #include "AssetManager.h"
 #include "InputManager.h"
 #include "EventDispatcher.h"
+#include "StateManager.h"
+#include "MainMenuState.h"
 
 int main() {
     // Updated RenderWindow constructor
@@ -10,6 +12,9 @@ int main() {
     window.setFramerateLimit(5); // set frame rate to 5 fps for debugging purposes
 
     InputManager input;
+
+    StateManager manager;
+    manager.pushNewState(std::make_unique<MainMenuState>());
     // Create a shape (no change here)
     sf::CircleShape shape(100.0f);
     shape.setFillColor(sf::Color::Green);
@@ -29,7 +34,6 @@ int main() {
 
     while (window.isOpen()) {
         sf::Event event;
-        
 
         while (window.pollEvent(event)) {
             // Updated event handling
@@ -39,44 +43,9 @@ int main() {
 
             input.update(event, window);
         }
-
-        // ------- Testing InputManager
-        if (input.isKeyJustPressed(sf::Keyboard::Key::A)) {
-            std::cout << "A key was just pressed!" << std::endl;
-        }
-
-        if (input.isKeyHeld(sf::Keyboard::Key::A)) {
-            std::cout << "A key is held down!" << std::endl;
-        }
-
-        if (input.wasKeyReleased(sf::Keyboard::Key::A)) {
-            std::cout << "A was just released" << std::endl;
-        }
-
-        if (input.isMouseButtonJustPressed(sf::Mouse::Button::Left)) {
-            std::cout << "Left was just pressed!" << std::endl;
-        }
-
-        if (input.isMouseButtonHeld(sf::Mouse::Button::Left)) {
-            std::cout << "Left is held down!" << std::endl;
-        }
-
-        if (input.wasMouseButtonReleased(sf::Mouse::Button::Left)) {
-            std::cout << "Left was just released" << std::endl;
-        }
-
-        if (input.hasMouseMoved()) {
-            std::cout << "mouse moved" << std::endl;
-        }
         
-        auto mouse_position = input.getMousePosition();
-        std::cout << "Mouse position: (x) " << mouse_position.x << " (y) " << mouse_position.y << std::endl;
-        // ------- End of Testing InputManager
-
+        manager.getCurrentState()->run(0, window, input);
         input.endFrame();
-        window.clear();
-        window.draw(test); // Part of testing the AssetManager
-        window.display();
     }
 
     return 0;
