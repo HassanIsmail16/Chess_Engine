@@ -10,7 +10,6 @@ int main() {
     window.setFramerateLimit(5); // set frame rate to 5 fps for debugging purposes
 
     InputManager input;
-    EventDispatcher dispatcher;
     // Create a shape (no change here)
     sf::CircleShape shape(100.0f);
     shape.setFillColor(sf::Color::Green);

@@ -1,5 +1,10 @@
 #include "EventDispatcher.h"
 
+EventDispatcher& EventDispatcher::getInstance() {
+	static EventDispatcher instance;
+	return instance;
+}
+
 void EventDispatcher::subscribe(EventType type, EventHandler handler) {
 	handlers[type].push_back(handler);
 }

@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include <stack>
 #include "State.h"
+#include "EventDispatcher.h"
 
 class StateManager {
 public:
@@ -9,6 +10,7 @@ public:
 	void removeCurrentState();
 	void transitionTo(std::unique_ptr<State> new_state);
 	State* getCurrentState();
+
 private:
 	std::stack<std::unique_ptr<State>> states;
 };
