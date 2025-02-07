@@ -38,8 +38,8 @@ private:
 	bool log_to_file;
 };
 
-template<typename ...Args>
-inline void Logger::log(Level level, const std::string& file, int line, Args && ...args) {
+template<typename... Args>
+inline void Logger::log(Level level, const std::string& file, int line, Args&&... args) {
 	std::ostringstream oss;
 	(oss << ... << std::forward<Args>(args));
 	getInstance().internalLog(level, oss.str(), file, line);

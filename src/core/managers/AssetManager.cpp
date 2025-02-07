@@ -1,4 +1,5 @@
 #include "AssetManager.h"
+#include "../log/logger.hpp"
 
 AssetManager& AssetManager::getInstance() {
 	static AssetManager instance;
@@ -7,7 +8,7 @@ AssetManager& AssetManager::getInstance() {
 
 void AssetManager::loadAssets(const std::string& directory_name) {
 	if (!std::filesystem::exists(directory_name)) {
-		std::cerr << "Error: Directory doesn't exist, failed to load assets from: " << directory_name << '\n';
+		LOG_ERROR("Directory " + directory_name + " doesn't exist, failed to load assets");
 		return;
 	}
 
@@ -37,10 +38,10 @@ void AssetManager::loadTexture(const std::string& texture_name, const std::strin
 	sf::Texture texture;
 	if (texture.loadFromFile(filename)) {
 		textures[texture_name] = texture;
-		std::cout << "Texture loaded successfully: " << texture_name << " from " << filename << '\n';
+		LOG_INFO("Texture loaded successfully: ", texture_name, " from ", filename);
 	}
 	else {
-		std::cerr << "Error: Failed to load texture: " << filename << '\n';
+		LOG_ERROR("Failed to load texture: ", filename);
 	}
 }
 
@@ -48,10 +49,10 @@ void AssetManager::loadFont(const std::string& font_name, const std::string& fil
 	sf::Font font;
 	if (font.loadFromFile(filename)) {
 		fonts[font_name] = font;
-		std::cout << "Font loaded successfully: " << font_name << " from " << filename << '\n';
+		LOG_INFO("Font loaded successfully: ", font_name, " from ", filename);
 	}
 	else {
-		std::cerr << "Error: Failed to load font: " << filename << '\n';
+		LOG_ERROR("Failed to load font: ", filename);
 	}
 }
 
@@ -59,10 +60,10 @@ void AssetManager::loadSound(const std::string& sound_name, const std::string& f
 	sf::SoundBuffer sound;
 	if (sound.loadFromFile(filename)) {
 		sound_buffers[sound_name] = sound;
-		std::cout << "Sound loaded successfully: " << sound_name << " from " << filename << '\n';
+		LOG_INFO("Sound loaded successfully: ", sound_name, " from ", filename);
 	}
 	else {
-		std::cerr << "Error: Failed to load sound: " << filename << '\n';
+		LOG_ERROR("Failed to load sound: ", filename);
 	}
 }
 
@@ -75,7 +76,7 @@ sf::Sprite AssetManager::getSprite(const std::string& texture_name) {
 		sprite.setTexture(textures.at(texture_name));
 	}
 	catch (const std::exception& e) {
-		std::cerr << "Failed to retrieve texture: " << texture_name << " from AssetManager" << '\n';
+		LOG_ERROR("Failed to retrieve texture: ", texture_name, " from AssetManager");
 	}
 	return sprite;
 }
@@ -85,7 +86,7 @@ sf::Font AssetManager::getFont(const std::string& font_name) {
 		return fonts.at(font_name);
 	}
 	catch (const std::exception& e) {
-		std::cerr << "Failed to retrieve font: " << font_name << " from AssetManager" << '\n';
+		LOG_ERROR("Failed to retrieve font: ", font_name, " from AssetManager");
 		return sf::Font();
 	}
 }
@@ -96,7 +97,7 @@ sf::Sound AssetManager::getSound(const std::string& sound_name) {
 		sound.setBuffer(sound_buffers.at(sound_name));
 	}
 	catch (const std::exception& e) {
-		std::cerr << "Failed to retrieve sound buffer: " << sound_name << " from AssetManager" << '\n';
+		LOG_ERROR("Failed to retrieve sound buffer: ", sound_name, "from AssetManager");
 	}
 	return sound;
 }

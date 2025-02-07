@@ -20,5 +20,4 @@ private:
 	sf::RenderWindow* window;
 	StateManager* state_manager;
 	InputManager* input_manager;
-
 };
