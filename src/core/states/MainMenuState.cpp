@@ -1,5 +1,5 @@
 #include "MainMenuState.h"
-#include ../events/EventDispatcher.h"
+#include "../events/EventDispatcher.h"
 #include "StateForward.h"
 
 void MainMenuState::run(const float& dt, sf::RenderWindow& window, const InputManager& input_manager) {
