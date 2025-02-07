@@ -1,8 +1,8 @@
 #pragma once
 #include <memory>
-#include "State.h"
-#include "MainMenuState.h"
-#include "GamePlayState.h"
+#include "../states/State.h"
+#include "../states/MainMenuState.h"
+#include "../states/GamePlayState.h"
 
 enum class EventType {
 	GameStartEvent,

@@ -2,7 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include <stack>
 #include "State.h"
-#include "EventDispatcher.h"
+#include "../events/EventDispatcher.h"
 
 class StateManager {
 public:

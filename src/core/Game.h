@@ -1,6 +1,6 @@
 #pragma once
-#include "StateManager.h"
-#include "InputManager.h"
+#include "states/StateManager.h"
+#include "managers/AssetManager.h"
 
 class Game {
 public:

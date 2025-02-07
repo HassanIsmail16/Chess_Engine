@@ -1,7 +1,7 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include "InputManager.h"
-#include "AssetManager.h"
+#include "../managers/InputManager.h"
+#include "../managers/AssetManager.h"
 
 class State {
 public:

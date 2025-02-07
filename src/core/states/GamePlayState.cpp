@@ -1,5 +1,5 @@
 #include "GamePlayState.h"
-#include "EventDispatcher.h"
+#include "../events/EventDispatcher.h"
 #include "StateForward.h"
 
 void GamePlayState::run(const float& dt, sf::RenderWindow& window, const InputManager& input_manager) {

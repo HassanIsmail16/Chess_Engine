@@ -8,21 +8,23 @@ set(SFML_ROOT "${CMAKE_SOURCE_DIR}/lib/SFML")
 set(SFML_INCLUDE_DIR "${SFML_ROOT}/include")
 set(SFML_LIB_DIR "${SFML_ROOT}/lib")
 
+# collect source files
+file(GLOB_RECURSE SRC_FILES "src/*.cpp")
+file(GLOB_RECURSE HEADER_FILES "src/*.h")
+
 # add executable
-file(GLOB SRC_FILES "src/*.cpp")
-file(GLOB HEADER_FILES "src/*.h")
 add_executable(Chess ${SRC_FILES} ${HEADER_FILES})
 
-# Ensure CMake re-runs if a new file is added
+# ensure CMake re-runs if a new file is added
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # include SFML headers
-target_include_directories(Chess PRIVATE ${SFML_INCLUDE_DIR})
+target_include_directories(Chess PRIVATE ${SFML_INCLUDE_DIR} ${SOURCE_DIR})
 
 # link SFML libraries
 target_link_directories(Chess PRIVATE ${SFML_LIB_DIR})
 
-# Debug postfix for Windows
+# debug postfix for Windows
 if(WIN32)
     set(SFML_DEBUG_POSTFIX "-d")
 endif()
@@ -39,7 +41,7 @@ target_link_libraries(Chess PRIVATE
     optimized sfml-audio
 )
 
-# copy SFML DLLs into build directory (windows only)
+# copy SFML DLLs into build directory (Windows only)
 if(WIN32 AND EXISTS "${SFML_ROOT}/bin")
     add_custom_command(TARGET Chess POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
@@ -61,3 +63,7 @@ endif()
 message(STATUS "SFML_ROOT: ${SFML_ROOT}")
 message(STATUS "SFML_INCLUDE_DIR: ${SFML_INCLUDE_DIR}")
 message(STATUS "SFML_LIB_DIR: ${SFML_LIB_DIR}")
+
+# debug output to verify collected source files
+message(STATUS "Source files: ${SRC_FILES}")
+message(STATUS "Header files: ${HEADER_FILES}")
