@@ -35,8 +35,8 @@ void AssetManager::loadAssets(const std::string& directory_name) {
 
 
 void AssetManager::loadTexture(const std::string& texture_name, const std::string& filename) {
-	sf::Texture texture;
-	if (texture.loadFromFile(filename)) {
+	auto texture = std::make_shared<sf::Texture>();
+	if (texture->loadFromFile(filename)) {
 		textures[texture_name] = texture;
 		LOG_INFO("Texture loaded successfully: ", texture_name, " from ", filename);
 	}
@@ -46,8 +46,8 @@ void AssetManager::loadTexture(const std::string& texture_name, const std::strin
 }
 
 void AssetManager::loadFont(const std::string& font_name, const std::string& filename) {
-	sf::Font font;
-	if (font.loadFromFile(filename)) {
+	auto font = std::make_shared<sf::Font>();
+	if (font->loadFromFile(filename)) {
 		fonts[font_name] = font;
 		LOG_INFO("Font loaded successfully: ", font_name, " from ", filename);
 	}
@@ -57,9 +57,9 @@ void AssetManager::loadFont(const std::string& font_name, const std::string& fil
 }
 
 void AssetManager::loadSound(const std::string& sound_name, const std::string& filename) {
-	sf::SoundBuffer sound;
-	if (sound.loadFromFile(filename)) {
-		sound_buffers[sound_name] = sound;
+	auto sound_buffer = std::make_shared<sf::SoundBuffer>();
+	if (sound_buffer->loadFromFile(filename)) {
+		sound_buffers[sound_name] = sound_buffer;
 		LOG_INFO("Sound loaded successfully: ", sound_name, " from ", filename);
 	}
 	else {
@@ -73,7 +73,7 @@ sf::Sprite AssetManager::getSprite(const std::string& texture_name) {
 	// Create sprite from the texture
 	sf::Sprite sprite;
 	try {
-		sprite.setTexture(textures.at(texture_name));
+		sprite.setTexture(*textures.at(texture_name));
 	}
 	catch (const std::exception& e) {
 		LOG_ERROR("Failed to retrieve texture: ", texture_name, " from AssetManager");
@@ -83,7 +83,7 @@ sf::Sprite AssetManager::getSprite(const std::string& texture_name) {
 
 sf::Font AssetManager::getFont(const std::string& font_name) {
 	try {
-		return fonts.at(font_name);
+		return *fonts.at(font_name);
 	}
 	catch (const std::exception& e) {
 		LOG_ERROR("Failed to retrieve font: ", font_name, " from AssetManager");
@@ -94,7 +94,7 @@ sf::Font AssetManager::getFont(const std::string& font_name) {
 sf::Sound AssetManager::getSound(const std::string& sound_name) {
 	sf::Sound sound;
 	try {
-		sound.setBuffer(sound_buffers.at(sound_name));
+		sound.setBuffer(*sound_buffers.at(sound_name));
 	}
 	catch (const std::exception& e) {
 		LOG_ERROR("Failed to retrieve sound buffer: ", sound_name, "from AssetManager");

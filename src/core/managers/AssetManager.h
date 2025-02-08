@@ -7,6 +7,7 @@
 #include <string>
 #include <filesystem>
 #include <iostream>
+#include <memory>
 
 
 class AssetManager {
@@ -42,7 +43,7 @@ private:
 	const std::unordered_set<std::string> font_extensions = {".ttf", ".otf", ".fnt"};
 	const std::unordered_set<std::string> audio_extensions = {".wav", ".ogg", ".flac", ".aiff", ".au"};
 
-	std::unordered_map<std::string, sf::Texture> textures;
-	std::unordered_map<std::string, sf::Font> fonts;
-	std::unordered_map<std::string, sf::SoundBuffer> sound_buffers;
+	std::unordered_map<std::string, std::shared_ptr<sf::Texture>> textures;
+	std::unordered_map<std::string, std::shared_ptr<sf::Font>> fonts;
+	std::unordered_map<std::string, std::shared_ptr<sf::SoundBuffer>> sound_buffers;
 };
