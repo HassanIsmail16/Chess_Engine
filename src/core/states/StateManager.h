@@ -9,8 +9,8 @@ class StateManager {
 public:
 	StateManager();
 	void pushNewState(std::unique_ptr<State> new_state);
-	void removeCurrentState();
-	void transitionTo(std::unique_ptr<State> new_state);
+	void popCurrentState();
+	void replaceCurrentState(std::unique_ptr<State> new_state);
 	State* getCurrentState();
 
 private:

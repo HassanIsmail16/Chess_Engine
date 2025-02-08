@@ -56,7 +56,7 @@ void Game::exit() {
 	// destroy state manager
 	if (state_manager) {
 		while (state_manager->getCurrentState()) {
-			state_manager->removeCurrentState();
+			state_manager->popCurrentState();
 		}
 		delete state_manager;
 	}
