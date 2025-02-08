@@ -23,7 +23,7 @@ void Game::run() {
 		
 		while (window->pollEvent(event)) {
 			if (event.type == sf::Event::Closed) {
-				exit();
+				return;
 			}
 
 			input_manager->update(event, *window);
@@ -51,6 +51,7 @@ void Game::exit() {
 	if (window) {
 		window->close();
 		delete window;
+		window = nullptr;
 	}
 
 	// destroy state manager
@@ -59,10 +60,12 @@ void Game::exit() {
 			state_manager->popCurrentState();
 		}
 		delete state_manager;
+		state_manager = nullptr;
 	}
 
 	// destroy input manager
 	if (input_manager) {
 		delete input_manager;
+		input_manager = nullptr;
 	}
 }
