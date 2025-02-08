@@ -6,8 +6,8 @@
 
 enum class EventType {
 	GameStartEvent,
-	EnterMainMenuEvent,
-	ExitCurrentStateEvent,
+	PushNewStateEvent,
+	PopCurrentStateEvent,
 	ReplaceCurrentStateEvent
 };
 
@@ -31,14 +31,15 @@ public:
 	GameStartEvent() : Event(EventType::GameStartEvent) {}
 };
 
-class EnterMainMenuEvent : public Event {
+class PushNewStateEvent : public Event {
 public:
-	EnterMainMenuEvent() : Event(EventType::EnterMainMenuEvent) {}
+	PushNewStateEvent() : Event(EventType::PushNewStateEvent), new_state(std::move(new_state)) {}
+	std::unique_ptr<State> new_state;
 };
 
-class ExitCurrentStateEvent : public Event {
+class PopCurrentStateEvent : public Event {
 public:
-	ExitCurrentStateEvent() : Event(EventType::ExitCurrentStateEvent) {}
+	PopCurrentStateEvent() : Event(EventType::PopCurrentStateEvent) {}
 };
 
 class ReplaceCurrentStateEvent : public Event {
