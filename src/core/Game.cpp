@@ -2,15 +2,15 @@
 
 Game::Game() {
 	// initialize window
-	window = new sf::RenderWindow(sf::VideoMode(800, 600, 32), "Chess!");
+	window = std::make_unique<sf::RenderWindow>(sf::VideoMode(800, 600, 32), "Chess!");
 	window->setFramerateLimit(FPS_CAP);
 
 	// initialize state manager
-	state_manager = new StateManager();
+	state_manager = std::make_unique<StateManager>();
 	state_manager->pushNewState(std::make_unique<MainMenuState>());
 
 	// initialize input manager
-	input_manager = new InputManager();
+	input_manager = std::make_unique<InputManager>();
 	
 	// initialize assets
 	initializeAssets();
@@ -34,38 +34,9 @@ void Game::run() {
 		input_manager->endFrame();
 	}
 }
-
-Game::~Game() {
-	exit();
-}
-
 void Game::initializeAssets() {
 	auto& asset_manager = AssetManager::getInstance();
 	asset_manager.loadAssets("assets/images/");
 	asset_manager.loadAssets("assets/fonts/");
 	asset_manager.loadAssets("assets/sounds/");
-}
-
-void Game::exit() {
-	// destroy window
-	if (window) {
-		window->close();
-		delete window;
-		window = nullptr;
-	}
-
-	// destroy state manager
-	if (state_manager) {
-		while (state_manager->getCurrentState()) {
-			state_manager->popCurrentState();
-		}
-		delete state_manager;
-		state_manager = nullptr;
-	}
-
-	// destroy input manager
-	if (input_manager) {
-		delete input_manager;
-		input_manager = nullptr;
-	}
 }
