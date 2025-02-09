@@ -37,8 +37,8 @@ void Logger::internalLog(Level level, const std::string& message, const std::str
 
 std::string Logger::getTimeStamp() {
 	auto now = std::time(nullptr);
-	char buffer[10];
-	std::strftime(buffer, sizeof(buffer), "%I:%M %p", std::localtime(&now));
+	char buffer[20];
+	std::strftime(buffer, sizeof(buffer), "%I:%M:%S %p", std::localtime(&now));
 	return std::string(buffer);
 }
 
