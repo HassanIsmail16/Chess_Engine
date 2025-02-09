@@ -6,7 +6,9 @@ class MainMenuState : public State {
 public:
 	void run(const float& dt, sf::RenderWindow& window, const InputManager& input_manager) override;
 	void exit() override;
+	std::string getName() const override;
 	~MainMenuState() override = default;
+
 
 private:
 	void update(const float& dt) override;

@@ -6,6 +6,7 @@ class GamePlayState : public State {
 public:
 	void run(const float& dt, sf::RenderWindow& window, const InputManager& input_manager) override;
 	void exit() override;
+	std::string getName() const override;
 	~GamePlayState() = default;
 
 private:

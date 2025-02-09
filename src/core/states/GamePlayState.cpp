@@ -12,6 +12,10 @@ void GamePlayState::exit() {
 	return;
 }
 
+std::string GamePlayState::getName() const {
+	return "GamePlayState";
+}
+
 void GamePlayState::update(const float& dt) {
 	return;
 }

@@ -7,6 +7,7 @@ class State {
 public:
 	virtual void run(const float& dt, sf::RenderWindow& window, const InputManager& input_manager) = 0;
 	virtual void exit() = 0;
+	virtual std::string getName() const = 0;
 	virtual ~State() = default;
 
 private:

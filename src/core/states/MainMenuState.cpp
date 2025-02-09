@@ -12,6 +12,10 @@ void MainMenuState::exit() {
 	return;
 }
 
+std::string MainMenuState::getName() const {
+	return "MainMenuState";
+}
+
 void MainMenuState::update(const float& dt) {
 	return;
 }
