@@ -103,13 +103,13 @@ sf::Sound AssetManager::getSound(const std::string& sound_name) {
 }
 
 bool AssetManager::isImage(const std::string& extension) {
-	return image_extensions.count(extension);
+	return image_extensions.contains(extension);
 }
 
 bool AssetManager::isFont(const std::string& extension) {
-	return font_extensions.count(extension);
+	return font_extensions.contains(extension);
 }
 
 bool AssetManager::isAudio(const std::string& extension) {
-	return audio_extensions.count(extension);
+	return audio_extensions.contains(extension);
 }
