@@ -14,10 +14,10 @@ public:
     void makeMove(const Move& move);
     void undoLastMove();
 
-    std::unique_ptr<Piece>& getPieceAt(const Position& position) const;
+    std::unique_ptr<Piece>& getPieceAt(const Position& position);
     void setPieceAt(const Position& position, std::unique_ptr<Piece> new_piece);
 
-    bool isKingChecked() const;
+    bool isKingChecked(const ChessColor& color);
 
     const std::vector<std::unique_ptr<Piece>>& getCapturedPieces(const ChessColor& color) const;
 
@@ -32,11 +32,15 @@ public:
 private:
     void initializeBoard();
 
-    std::vector<Position> getValidMoves(std::vector<Position>& candidate_moves, Piece* moving_piece) const;
+    std::vector<Position> getValidMoves(std::vector<Position>& candidate_moves, Piece* moving_piece);
 
     void renderBoard(sf::RenderWindow& window);
     void renderTiles(sf::RenderWindow& window);
     void renderPieces(sf::RenderWindow& window);
+
+    bool isInBounds(const Position& position) const;
+
+    Position getKingPosition(const ChessColor& color);
 
     std::array<std::array<std::unique_ptr<Piece>, 8>, 8> board;
     std::vector<std::unique_ptr<Piece>> white_captured;

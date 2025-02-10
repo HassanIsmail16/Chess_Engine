@@ -103,7 +103,7 @@ std::vector<Position> Piece::getPawnPossibleMoves() const {
 		{row + 2 * direction, col}, // double step
 		{row, col + 1}, // right capture
 		{row, col - 1} // left capture
-	}
+	};
 }
 
 std::vector<Position> Piece::getKnightPossibleMoves() const {

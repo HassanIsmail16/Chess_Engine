@@ -9,6 +9,7 @@ enum class ChessColor {
 
 struct Position {
     Position(const int& row, const int& col): row(row), col(col) {}
+    bool operator==(const Position& other) { return row == other.row && col == other.col; }
     int row;
     int col;
 };
