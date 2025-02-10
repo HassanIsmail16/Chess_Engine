@@ -3,13 +3,24 @@
 #include "BoardUtilities.h"
 #include "../GameObject.h"
 #include <array>
+#include "Piece.h"
+#include "BoardGeometry.h"
 
-class Board : public GameObject {
+enum class TileState {
+    None,
+    Selected,
+    Highlighted,
+    Attacked,
+    Special,
+    LastMove
+};
+
+class Board {
 public:
     Board();
 
-    void update(const float& dt) override;
-    void render(sf::RenderWindow& window) override;
+    void update(const float& dt);
+    void render(sf::RenderWindow& window);
 
     void makeMove(const Move& move);
     void undoLastMove();
@@ -36,7 +47,12 @@ private:
 
     void renderBoard(sf::RenderWindow& window);
     void renderTiles(sf::RenderWindow& window);
-    void renderPieces(sf::RenderWindow& window);
+    void renderTileAt(sf::RenderWindow& window, const Position& position);
+    void renderPieceAt(sf::RenderWindow& window, const Position& position);
+
+    void updateTileStates(const float& dt);
+    std::string getTileOverlayName(const Position& position);
+    TileState computeTileState(const Position& position);
 
     bool isInBounds(const Position& position) const;
 
@@ -50,5 +66,9 @@ private:
     std::vector<Position> valid_moves;
     Move* last_move;
 
+    std::array<std::array<TileState, 8>, 8> tile_states;
+
     bool is_white_side; // to track board orientation
+
+    BoardGeometry geometry;
 };

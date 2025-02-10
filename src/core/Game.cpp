@@ -2,7 +2,7 @@
 
 Game::Game() {
 	// initialize window
-	window = std::make_unique<sf::RenderWindow>(sf::VideoMode(800, 600, 32), "Chess!");
+	window = std::make_unique<sf::RenderWindow>(sf::VideoMode(1280, 720, 32), "Chess!");
 	window->setFramerateLimit(FPS_CAP);
 
 	// initialize state manager

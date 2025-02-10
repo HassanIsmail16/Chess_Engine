@@ -2,6 +2,10 @@
 #include "../events/EventDispatcher.h"
 #include "StateForward.h"
 
+GamePlayState::GamePlayState() {
+	board = std::make_unique<Board>();
+}
+
 void GamePlayState::run(const float& dt, sf::RenderWindow& window, const InputManager& input_manager) {
 	update(dt);
 	handleInput(input_manager);
@@ -17,12 +21,13 @@ std::string GamePlayState::getName() const {
 }
 
 void GamePlayState::update(const float& dt) {
+	board->update(dt);
 	return;
 }
 
 void GamePlayState::render(sf::RenderWindow& window) {
 	window.clear(sf::Color::Green);
-	window.draw(AssetManager::getInstance().getSprite("king-w"));
+	board->render(window);
 	window.display();
 }
 
@@ -34,5 +39,14 @@ void GamePlayState::handleInput(const InputManager& input_manager) {
 				std::make_unique<MainMenuState>()
 			)
 		);
+	}
+
+	// testing piece selection
+	if (input_manager.isMouseButtonJustPressed(sf::Mouse::Button::Left)) {
+		board->selectPiece(Position(0, 0));
+	}
+
+	if (input_manager.isMouseButtonJustPressed(sf::Mouse::Button::Right)) {
+		board->unselectPiece();
 	}
 }

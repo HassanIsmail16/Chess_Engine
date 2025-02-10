@@ -9,7 +9,9 @@ enum class ChessColor {
 
 struct Position {
     Position(const int& row, const int& col): row(row), col(col) {}
+    bool operator==(Position& other) { return row == other.row && col == other.col; }
     bool operator==(const Position& other) { return row == other.row && col == other.col; }
+
     int row;
     int col;
 };
@@ -23,8 +25,8 @@ enum class MoveType {
 
 struct Move {
     Move(const Position& from, const Position& to, Piece* taken_over, const MoveType& type = MoveType::Regular): from(from), to(to), taken_over(taken_over), type(type) {}
-    const Position from;
-    const Position to;
+    Position from;
+    Position to;
     Piece* taken_over;
-    const MoveType type;
+    MoveType type;
 };
