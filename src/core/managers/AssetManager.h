@@ -28,9 +28,11 @@ public:
 	void loadSound(const std::string& sound_name, const std::string& filename);
 
 	// Retrieve any asset by name
+	sf::Texture& getTexture(const std::string& texture_name);
 	sf::Sprite getSprite(const std::string& texture_name);
-	sf::Font getFont(const std::string& font_name);
+	sf::Font& getFont(const std::string& font_name);
 	sf::Sound getSound(const std::string& sound_name);
+	sf::SoundBuffer& getSoundBuffer(const std::string& sound_name);
 
 private:
 	AssetManager();

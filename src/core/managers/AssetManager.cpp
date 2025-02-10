@@ -69,6 +69,16 @@ void AssetManager::loadSound(const std::string& sound_name, const std::string& f
 
 AssetManager::AssetManager() {}
 
+sf::Texture& AssetManager::getTexture(const std::string& texture_name) {
+	try {
+		return *textures.at(texture_name);
+	} catch (const std::exception& e) {
+		LOG_ERROR("Failed to retrieve texture: ", texture_name, " from AssetManager");
+		static sf::Texture empty_texture;
+		return empty_texture;
+	}
+}
+
 sf::Sprite AssetManager::getSprite(const std::string& texture_name) {
 	// Create sprite from the texture
 	sf::Sprite sprite;
@@ -81,13 +91,14 @@ sf::Sprite AssetManager::getSprite(const std::string& texture_name) {
 	return sprite;
 }
 
-sf::Font AssetManager::getFont(const std::string& font_name) {
+sf::Font& AssetManager::getFont(const std::string& font_name) {
 	try {
 		return *fonts.at(font_name);
 	}
 	catch (const std::exception& e) {
 		LOG_ERROR("Failed to retrieve font: ", font_name, " from AssetManager");
-		return sf::Font();
+		static sf::Font empty_font;
+		return empty_font;
 	}
 }
 
@@ -97,9 +108,19 @@ sf::Sound AssetManager::getSound(const std::string& sound_name) {
 		sound.setBuffer(*sound_buffers.at(sound_name));
 	}
 	catch (const std::exception& e) {
-		LOG_ERROR("Failed to retrieve sound buffer: ", sound_name, "from AssetManager");
+		LOG_ERROR("Failed to retrieve sound buffer: ", sound_name, " from AssetManager");
 	}
 	return sound;
+}
+
+sf::SoundBuffer& AssetManager::getSoundBuffer(const std::string& sound_name) {
+	try {
+		return *sound_buffers.at(sound_name);
+	} catch (const std::exception& e) {
+		LOG_ERROR("Failed to retrieve sound buffer: ", sound_name, " from AssetManager");
+		static sf::SoundBuffer empty_soundbuffer;
+		return empty_soundbuffer;
+	}
 }
 
 bool AssetManager::isImage(const std::string& extension) {
