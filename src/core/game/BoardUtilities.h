@@ -9,8 +9,8 @@ enum class ChessColor {
 
 struct Position {
     Position(const int& row, const int& col): row(row), col(col) {}
-    const int row;
-    const int col;
+    int row;
+    int col;
 };
 
 enum class MoveType {

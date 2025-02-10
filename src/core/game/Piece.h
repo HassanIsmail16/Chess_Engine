@@ -1,0 +1,53 @@
+#pragma once
+
+#include "BoardUtilities.h"
+#include "../GameObject.h"
+#include "../managers/AssetManager.h"
+
+enum class PieceType {
+    Pawn,
+    Rook,
+    Knight,
+    Bishop,
+    Queen,
+    King
+};
+
+class Piece : public GameObject {
+public:
+    Piece(PieceType, ChessColor, Position);
+
+    void update(const float& dt) override;
+    void render(sf::RenderWindow& window) override;
+
+    void setPosition(const Position new_position);
+
+    void incrementMoveCount();
+    void decrementMoveCount();
+
+    std::vector<Position> getPossibleMoves() const;
+
+    bool hasMoved() const;
+    PieceType getType() const;
+    ChessColor getColor() const;
+
+    std::string getPieceCode();
+
+private:
+    std::vector<Position> getPawnPossibleMoves() const;
+    std::vector<Position> getKnightPossibleMoves() const;
+    std::vector<Position> getRookPossibleMoves() const;
+    std::vector<Position> getBishopPossibleMoves() const;
+    std::vector<Position> getQueenPossibleMoves() const;
+    std::vector<Position> getKingPossibleMoves() const;
+
+    std::vector<Position> getLinePossibleMoves(const int& dx, const int& dy) const;
+
+    int move_count;
+    Position current_position;
+    sf::Sprite sprite;
+    PieceType type;
+    ChessColor color;
+};
+
+#define MERGE_VECTORS(vect1, vect2) vect1.insert(vect1.end(), vect2.begin(), vect2.end())
