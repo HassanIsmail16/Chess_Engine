@@ -171,11 +171,11 @@ std::vector<Position> Piece::getKingPossibleMoves() const {
 		{row - 1, col}, // up
 		{row - 1, col + 1}, // up right
 		{row, col + 1}, // right
-		{row - 1, col + 1}, // down right
-		{row - 1, col}, // down 
-		{row - 1, col - 1}, // down left
+		{row + 1, col + 1}, // down right
+		{row + 1, col}, // down 
+		{row + 1, col - 1}, // down left
 		{row, col - 1}, // left
-		{row + 1, col - 1} // up left
+		{row - 1, col - 1} // up left
 	};
 }
 
