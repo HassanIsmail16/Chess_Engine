@@ -31,9 +31,9 @@ public:
 
     bool isKingChecked(const ChessColor& color, bool skipMoveValidation = false);
 
-    std::vector<Position> getValidMoves(std::vector<Position>& candidate_moves, Piece* moving_piece);
+    std::vector<Position> getValidMoves(const std::vector<Position>& candidate_moves, Piece* moving_piece);
 
-    std::vector<Position> getValidatedPawnMoves(std::vector<Position>& candidate_moves, Piece* moving_piece);
+    std::vector<Position> getValidatedPawnMoves(const std::vector<Position>& candidate_moves, Piece* moving_piece);
     
     const std::vector<std::unique_ptr<Piece>>& getCapturedPieces(const ChessColor& color) const;
 

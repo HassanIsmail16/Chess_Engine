@@ -41,18 +41,8 @@ void GamePlayState::handleInput(const InputManager& input_manager) {
 		);
 	}
 
-	// testing piece selections
-	static int col = 0, row = 0;
-	if (input_manager.isKeyJustPressed(sf::Keyboard::Right)) col++;
-	if (input_manager.isKeyJustPressed(sf::Keyboard::Left)) col--;
-	if (input_manager.isKeyJustPressed(sf::Keyboard::Up)) row--;
-	if (input_manager.isKeyJustPressed(sf::Keyboard::Down)) row++;
-
 	if (input_manager.isMouseButtonJustPressed(sf::Mouse::Button::Left)) {
-		board->selectPiece(Position(row, col));
-	}
-
-	if (input_manager.isMouseButtonJustPressed(sf::Mouse::Button::Right)) {
-		board->unselectPiece();
+		Position selected_position = board->getGeometry().getTileBoardPosition(input_manager.getMousePosition());
+		board->selectPiece(selected_position);
 	}
 }

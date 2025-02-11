@@ -50,7 +50,6 @@ Board::Board(const Board& other) {
 
 void Board::update(const float& dt) {
 	updateTileStates(dt);
-
 }
 
 void Board::render(sf::RenderWindow& window) {
@@ -86,7 +85,7 @@ void Board::setPieceAt(const Position& position, std::unique_ptr<Piece> new_piec
 	}
 
 	if (!new_piece) {
-		LOG_WARNING("Setting piece at row: ", position.row, ", col: ", position.col, " to a nullptr");
+		LOG_DEBUG("Setting piece at row: ", position.row, ", col: ", position.col, " to a nullptr");
 	}
 
 	board[position.row][position.col] = std::move(new_piece);
@@ -123,7 +122,7 @@ bool Board::isKingChecked(const ChessColor& color, bool skipMoveValidation) {
 	return false;
 }
 
-std::vector<Position> Board::getValidMoves(std::vector<Position>& candidate_moves, Piece* moving_piece) {
+std::vector<Position> Board::getValidMoves(const std::vector<Position>& candidate_moves, Piece* moving_piece) {
 	if (!moving_piece) {
 		return std::vector<Position>{};
 	}
@@ -162,7 +161,7 @@ std::vector<Position> Board::getValidMoves(std::vector<Position>& candidate_move
 	return valid_moves;
 }
 
-std::vector<Position> Board::getValidatedPawnMoves(std::vector<Position>& candidate_moves, Piece* moving_piece) {
+std::vector<Position> Board::getValidatedPawnMoves(const std::vector<Position>& candidate_moves, Piece* moving_piece) {
 	if (!moving_piece) {
 		return std::vector<Position>{};
 	}
@@ -247,13 +246,18 @@ const std::vector<std::unique_ptr<Piece>>& Board::getCapturedPieces(const ChessC
 
 void Board::selectPiece(const Position& position) {
 	selected_piece = getPieceAt(position).get();
-	if (selected_piece) {
-		LOG_INFO("A Piece of code ", selected_piece->getPieceCode(), " was selected");
+	if (!selected_piece) {
+		selected_piece = nullptr;
+		valid_moves.clear();
+		return;
 	}
+	LOG_INFO("A Piece of code ", selected_piece->getPieceCode(), " was selected");
+	valid_moves = getValidMoves(selected_piece->getPossibleMoves(), selected_piece);
 }
 
 void Board::unselectPiece() {
 	selected_piece = nullptr;
+	valid_moves.clear();
 }
 
 bool Board::isWhiteSide() const {

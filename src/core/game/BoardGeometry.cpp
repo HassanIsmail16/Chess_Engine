@@ -27,6 +27,17 @@ sf::Vector2f BoardGeometry::getTilePosition(const Position& position) const {
 	};
 }
 
+Position BoardGeometry::getTileBoardPosition(const sf::Vector2i& position) {
+	sf::Vector2f position_f(position.x, position.y);
+
+	float tile_x = position_f.x - tile_start_x;
+	float tile_y = position_f.y - tile_start_y;
+	return {
+		(int) tile_y / (int) tile_size,
+		(int) tile_x / (int) tile_size
+	};
+}
+
 float BoardGeometry::getTileSize() const {
 	return tile_size;
 }

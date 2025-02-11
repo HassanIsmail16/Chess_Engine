@@ -7,6 +7,7 @@ public:
 	void update(const sf::RenderWindow& window);
 
 	sf::Vector2f getTilePosition(const Position& position) const;
+	Position getTileBoardPosition(const sf::Vector2i& position);
 
 	float getTileSize() const;
 	float getBoardScale() const;
