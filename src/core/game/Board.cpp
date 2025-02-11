@@ -377,6 +377,11 @@ void Board::updateTileStates(const float& dt) {
 		auto position = getKingPosition(ChessColor::Black);
 		tile_states[position.row][position.col] = TileState::Attacked;
 	}
+
+	if (selected_piece) {
+		auto selected_position = selected_piece->getPosition();
+		tile_states[selected_position.row][selected_position.col] = TileState::Selected;
+	}
 }
 
 std::string Board::getTileOverlayName(const Position& position) {
@@ -391,11 +396,6 @@ std::string Board::getTileOverlayName(const Position& position) {
 }
 
 TileState Board::computeTileState(const Position& position) {
-	if (selected_piece && selected_piece->getPosition() == position) {
-		return TileState::Selected;
-	} // handle selected piece
-
-
 	auto find_position = std::find(valid_moves.begin(), valid_moves.end(), position);
 
 	if (find_position != valid_moves.end()) {
