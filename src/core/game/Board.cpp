@@ -178,10 +178,6 @@ void Board::initializeBoard() {
 	updateTileStates(0);
 }
 
-std::vector<Position> Board::getValidMoves(std::vector<Position>& candidate_moves, Piece* moving_piece) {
-	return std::vector<Position>();
-}
-
 void Board::renderBoard(sf::RenderWindow& window) {
 	sf::Sprite board_frame = AssetManager::getInstance().getSprite("board-frame");
 	board_frame.setScale(geometry.getBoardScale(), geometry.getBoardScale());
@@ -324,7 +320,7 @@ std::vector<Position> Board::getValidatedPawnMoves(std::vector<Position>& candid
 
 	std::vector<Position> valid_pawn_moves;
 	ChessColor moving_piece_color = moving_piece->getColor();
-	ChessColor opponent_color = (color == ChessColor::White ? ChessColor::Black : ChessColor::White);
+	ChessColor opponent_color = (moving_piece_color == ChessColor::White ? ChessColor::Black : ChessColor::White);
 
 	Position moving_piece_position = moving_piece->getPosition();
 	Position single_step = candidate_moves[0];
@@ -341,7 +337,7 @@ std::vector<Position> Board::getValidatedPawnMoves(std::vector<Position>& candid
 	}
 
 	if (hasPieceAt(right_capture)) {
-		if (getPieceAt(right_capture])->getColor() == opponent_color) {
+		if (getPieceAt(right_capture)->getColor() == opponent_color) {
 			valid_pawn_moves.emplace_back(right_capture);
 		}
 	}
@@ -368,18 +364,18 @@ std::vector<Position> Board::getValidatedPawnMoves(std::vector<Position>& candid
 			return valid_moves;
 		} // The captured pawn must have moved two squares in one move, landing right next to the capturing pawn.
 
-		int en_passant_row = (color == ChessColor::White ? 4 : 3);
+		int en_passant_row = (moving_piece_color == ChessColor::White ? 4 : 3);
 		if (last_moved_piece_position.row != en_passant_row) {
 			return valid_moves;
 		} // The en passante can only be done on this row
 
 		int col_distance = abs(last_moved_piece_position.col - moving_piece_position.col);
-		if (distance != 1) {
+		if (col_distance != 1) {
 			return valid_moves;
 		} // check if the captured pawn is directly next to the en passant pawn
 
 		// Calculate en passant move
-		int direction = (color == ChessColor::White ? 1 : -1);
+		int direction = (moving_piece_color == ChessColor::White ? 1 : -1);
 		Position en_passant_move(moving_piece_position.row + direction, last_moved_piece_position.col, PositionType::EnPassant);
 
 		if (isInBounds(en_passant_move)) {
@@ -394,7 +390,7 @@ bool Board::isInBounds(const Position& position) const {
 	return position.row < 8 && position.row >= 0 && position.col < 8 && position.col >= 0;
 }
 
-bool Board::hasFriendlyPiece(const Position& position, const ChessColor& color) const {
+bool Board::hasFriendlyPiece(const Position& position, const ChessColor& color) {
 	if (!hasPieceAt(position)) {
 		return false;
 	}
@@ -402,7 +398,7 @@ bool Board::hasFriendlyPiece(const Position& position, const ChessColor& color) 
 	return color == getPieceAt(position)->getColor();
 }
 
-bool Board::willCaptureKing(const Position& position) const {
+bool Board::willCaptureKing(const Position& position) {
 	if (!hasPieceAt(position)) {
 		return false;
 	}
@@ -410,7 +406,7 @@ bool Board::willCaptureKing(const Position& position) const {
 	return getPieceAt(position)->getType() == PieceType::King;
 }
 
-bool Board::isPathObstructed(const Position& from, const Position& to) const {
+bool Board::isPathObstructed(const Position& from, const Position& to) {
 	int horizontal_distance = to.col - from.col;
 	int vertical_distance = to.row - from.row;
 
@@ -433,12 +429,12 @@ bool Board::isPathObstructed(const Position& from, const Position& to) const {
 	return false;
 }
 
-bool Board::hasPieceAt(const Position& position) const {
+bool Board::hasPieceAt(const Position& position) {
 	auto& piece = getPieceAt(position);
 	return piece != nullptr;
 }
 
-bool Board::willExposeKing(const Position& from, const Position& to, const ChessColor& color) const {
+bool Board::willExposeKing(const Position& from, const Position& to, const ChessColor& color) {
 	Board copy(*this);
 	Move move(from, to, nullptr);
 	copy.makeMove(move);

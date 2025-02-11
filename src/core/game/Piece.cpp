@@ -98,7 +98,7 @@ PieceType Piece::getType() const {
 	return type;
 }
 
-ChessColor Piece::getColor() const {
+ChessColor Piece::getColor() {
 	return color;
 }
 

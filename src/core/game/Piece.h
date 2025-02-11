@@ -34,7 +34,7 @@ public:
     bool hasMoved() const;
     bool canBeObstructed() const;
     PieceType getType() const;
-    ChessColor getColor() const;
+    ChessColor getColor();
     Position getPosition() const;
     std::string getPieceCode();
 

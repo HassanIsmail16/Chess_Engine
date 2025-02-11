@@ -58,11 +58,11 @@ private:
     TileState computeTileState(const Position& position);
 
     bool isInBounds(const Position& position) const;
-    bool hasFriendlyPiece(const Position& position, const ChessColor& color) const;
-    bool willCaptureKing(const Position& position) const;
-    bool isPathObstructed(const Position& from, const Position& to) const;
-    bool hasPieceAt(const Position& position) const;
-    bool willExposeKing(const Position& from, const Position& to, const ChessColor& color) const;
+    bool hasFriendlyPiece(const Position& position, const ChessColor& color);
+    bool willCaptureKing(const Position& position);
+    bool isPathObstructed(const Position& from, const Position& to);
+    bool hasPieceAt(const Position& position);
+    bool willExposeKing(const Position& from, const Position& to, const ChessColor& color);
 
     Position getKingPosition(const ChessColor& color);
 
