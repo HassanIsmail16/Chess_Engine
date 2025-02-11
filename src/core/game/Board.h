@@ -33,7 +33,7 @@ public:
 
     std::vector<Position> getValidMoves(const std::vector<Position>& candidate_moves, Piece* moving_piece);
 
-    std::vector<Position> getValidatedPawnMoves(const std::vector<Position>& candidate_moves, Piece* moving_piece);
+    std::vector<Position> getValidPawnMoves(const std::vector<Position>& candidate_moves, Piece* moving_piece);
     
     const std::vector<std::unique_ptr<Piece>>& getCapturedPieces(const ChessColor& color) const;
 
@@ -64,7 +64,11 @@ private:
     bool willCaptureKing(const Position& position);
     bool isPathObstructed(const Position& from, const Position& to);
     bool hasPieceAt(const Position& position);
-    bool willExposeKing(const Position& from, const Position& to, const ChessColor& color);
+    bool willExposeKing(const Position& from, const Position& to, const ChessColor& king_color);
+    bool isValidPawnStep(const Position& from, const Position& to, const ChessColor& king_color);
+    bool isValidPawnCapture(const Position& from, const Position& to, const ChessColor& king_color);
+
+    Position getEnPassantMove(Piece* moving_piece);
 
     Position getKingPosition(const ChessColor& color);
 

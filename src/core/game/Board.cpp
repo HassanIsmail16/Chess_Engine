@@ -133,7 +133,7 @@ std::vector<Position> Board::getValidMoves(const std::vector<Position>& candidat
 	Position moving_piece_position = moving_piece->getPosition();
 
 	if (moving_piece_type == PieceType::Pawn) {
-		return getValidatedPawnMoves(candidate_moves, moving_piece);
+		return getValidPawnMoves(candidate_moves, moving_piece);
 	}
 
 	for (const auto& candidate_move : candidate_moves) {
@@ -148,10 +148,7 @@ std::vector<Position> Board::getValidMoves(const std::vector<Position>& candidat
 		}
 
 		// Create a temporary board copy to test if this move would expose the king
-		Board temp_board(*this);
-		Move temp_move(moving_piece_position, candidate_move, nullptr);
-		temp_board.makeMove(temp_move);
-		if (temp_board.isKingChecked(moving_piece_color, true)) { // Use skipMoveValidation=true to prevent recursion
+		if (willExposeKing(moving_piece_position, candidate_move, moving_piece_color)) {
 			continue;
 		}
 
@@ -161,7 +158,7 @@ std::vector<Position> Board::getValidMoves(const std::vector<Position>& candidat
 	return valid_moves;
 }
 
-std::vector<Position> Board::getValidatedPawnMoves(const std::vector<Position>& candidate_moves, Piece* moving_piece) {
+std::vector<Position> Board::getValidPawnMoves(const std::vector<Position>& candidate_moves, Piece* moving_piece) {
 	if (!moving_piece) {
 		return std::vector<Position>{};
 	}
@@ -177,67 +174,31 @@ std::vector<Position> Board::getValidatedPawnMoves(const std::vector<Position>& 
 	Position left_capture = candidate_moves[3];
 
 	// Single step forward
-	if (isInBounds(single_step) && !hasPieceAt(single_step)) {
+	if (isValidPawnStep(moving_piece_position, single_step, moving_piece_color)) {
 		valid_pawn_moves.emplace_back(single_step);
 	}
 
 	// Double step forward
-	if (isInBounds(single_step) && isInBounds(double_step) &&
-		!hasPieceAt(single_step) && !hasPieceAt(double_step) &&
-		!moving_piece->hasMoved()) {
+	if (!moving_piece->hasMoved() && isValidPawnStep(moving_piece_position, double_step, moving_piece_color)) {
 		valid_pawn_moves.emplace_back(double_step);
 	}
 
 	// Regular captures
-	if (isInBounds(right_capture) && hasPieceAt(right_capture) &&
-		getPieceAt(right_capture)->getColor() == opponent_color) {
+	if (isValidPawnCapture(moving_piece_position, right_capture, moving_piece_color)) {
 		valid_pawn_moves.emplace_back(right_capture);
 	}
 
-	if (isInBounds(left_capture) && hasPieceAt(left_capture) &&
-		getPieceAt(left_capture)->getColor() == opponent_color) {
+	if (isValidPawnCapture(moving_piece_position, left_capture, moving_piece_color)) {
+		valid_pawn_moves.emplace_back(left_capture);
+	}
+	
+	// En passant
+	Position en_passant_move = getEnPassantMove(moving_piece);
+	if (isInBounds(en_passant_move)) {
 		valid_pawn_moves.emplace_back(left_capture);
 	}
 
-	// En Passant
-	if (last_move) {
-		auto& last_moved_piece = getPieceAt(last_move->to);
-		if (last_moved_piece &&
-			last_moved_piece->getType() == PieceType::Pawn &&
-			last_moved_piece->getColor() == opponent_color) {
-
-			int vertical_distance = abs(last_move->from.row - last_move->to.row);
-			int en_passant_row = (moving_piece_color == ChessColor::White ? 4 : 3);
-			int col_distance = abs(last_moved_piece->getPosition().col - moving_piece_position.col);
-
-			if (vertical_distance == 2 &&
-				last_moved_piece->getPosition().row == en_passant_row &&
-				col_distance == 1) {
-
-				int direction = (moving_piece_color == ChessColor::White ? 1 : -1);
-				Position en_passant_move(moving_piece_position.row + direction,
-					last_moved_piece->getPosition().col,
-					PositionType::EnPassant);
-
-				if (isInBounds(en_passant_move)) {
-					valid_pawn_moves.emplace_back(en_passant_move);
-				}
-			}
-		}
-	}
-
-	// Filter out moves that would expose the king
-	std::vector<Position> final_valid_moves;
-	for (const auto& move : valid_pawn_moves) {
-		Board temp_board(*this);
-		Move temp_move(moving_piece_position, move, nullptr);
-		temp_board.makeMove(temp_move);
-		if (!temp_board.isKingChecked(moving_piece_color, true)) {
-			final_valid_moves.emplace_back(move);
-		}
-	}
-
-	return final_valid_moves;
+	return valid_pawn_moves;
 }
 
 const std::vector<std::unique_ptr<Piece>>& Board::getCapturedPieces(const ChessColor& color) const {
@@ -454,11 +415,68 @@ bool Board::hasPieceAt(const Position& position) {
 	return piece != nullptr;
 }
 
-bool Board::willExposeKing(const Position& from, const Position& to, const ChessColor& color) {
-	Board copy(*this);
-	Move move(from, to, nullptr);
-	copy.makeMove(move);
-	return copy.isKingChecked(color);
+bool Board::willExposeKing(const Position& from, const Position& to, const ChessColor& king_color) {
+	// Create a temporary board copy to test if this move would expose the king
+	Board temp_board(*this);
+	Move temp_move(from, to, nullptr);
+	temp_board.makeMove(temp_move);
+	return temp_board.isKingChecked(king_color, true);
+}
+
+bool Board::isValidPawnStep(const Position& from, const Position& to, const ChessColor& king_color) {
+	return isInBounds(to) &&
+		!hasPieceAt(to) && 
+	    !isPathObstructed(from, to) && 
+		!willExposeKing(from, to, king_color);
+}
+
+bool Board::isValidPawnCapture(const Position& from, const Position& to, const ChessColor& king_color) {
+	ChessColor opponent_color = (king_color == ChessColor::White ? ChessColor::Black : ChessColor::White);
+	return isValidPawnStep(from, to, king_color) && hasPieceAt(to) && getPieceAt(to)->getColor() == opponent_color;
+}
+
+Position Board::getEnPassantMove(Piece* moving_piece) {
+	// moving piece data
+	ChessColor moving_piece_color = moving_piece->getColor();
+	ChessColor opponent_color = (moving_piece_color == ChessColor::White ? ChessColor::Black : ChessColor::White);
+	Position moving_piece_position = moving_piece->getPosition();
+
+	// last moved piece data
+	auto& last_moved_piece = getPieceAt(last_move->to);
+	ChessColor last_moved_piece_color = last_moved_piece->getColor();
+	PieceType last_moved_piece_type = last_moved_piece->getType();
+	Position last_moved_piece_position = last_moved_piece->getPosition();
+
+	Position invalid_move = { -1, -1 };
+
+	if (last_moved_piece_type != PieceType::Pawn || last_moved_piece_color != opponent_color) {
+		return invalid_move;
+	} // The en passant capture must be performed on the turn immediately after the pawn being captured moves.
+
+	int vertical_distance = abs(last_move->from.row - last_move->to.row);
+	if (vertical_distance != 2) {
+		return invalid_move;
+	} // The captured pawn must have moved two squares in one move, landing right next to the capturing pawn.
+
+	int en_passant_row = (moving_piece_color == ChessColor::White ? 4 : 3);
+	if (last_moved_piece_position.row != en_passant_row) {
+		return invalid_move;
+	} // The en passante can only be done on this row
+
+	int col_distance = abs(last_moved_piece_position.col - moving_piece_position.col);
+	if (col_distance != 1) {
+		return invalid_move;
+	} // check if the captured pawn is directly next to the en passant pawn
+
+	// Calculate en passant move
+	int direction = (moving_piece_color == ChessColor::White ? 1 : -1);
+	Position en_passant_move(moving_piece_position.row + direction, last_moved_piece_position.col, PositionType::EnPassant);
+	if (isInBounds(en_passant_move) && !willExposeKing(en_passant_move, moving_piece_position, moving_piece_color) && !willCaptureKing(en_passant_move)) {
+		return en_passant_move;
+	}
+
+
+	return invalid_move;
 }
 
 

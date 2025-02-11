@@ -90,7 +90,7 @@ bool Piece::hasMoved() const {
 }
 
 bool Piece::canBeObstructed() const {
-	return (type == PieceType::Rook || type == PieceType::Bishop || type == PieceType::Queen);
+	return (type == PieceType::Rook || type == PieceType::Bishop || type == PieceType::Queen || type == PieceType::Pawn);
 }
 
 PieceType Piece::getType() const {
