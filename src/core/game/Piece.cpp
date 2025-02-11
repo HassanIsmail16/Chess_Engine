@@ -104,6 +104,7 @@ ChessColor Piece::getColor() {
 Position Piece::getPosition() const {
 	return current_position;
 }
+
 std::string Piece::getPieceCode() {
 	std::string type_code;
 	

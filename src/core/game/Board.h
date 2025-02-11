@@ -37,6 +37,9 @@ public:
     
     const std::vector<std::unique_ptr<Piece>>& getCapturedPieces(const ChessColor& color) const;
 
+    bool isValidMove(const Position& position);
+    const Piece* getSelectedPiece() const;
+
     void selectPiece(const Position& position);
     void unselectPiece();
 

@@ -60,6 +60,8 @@ void Board::render(sf::RenderWindow& window) {
 
 void Board::makeMove(const Move& move) {
 	auto& moving_piece = getPieceAt(move.from);
+	moving_piece->setPosition(move.to);
+	moving_piece->incrementMoveCount();
 	selected_piece = nullptr;
 	valid_moves.clear();
 	setPieceAt(move.to, std::move(moving_piece));
@@ -119,12 +121,13 @@ bool Board::isKingChecked(const ChessColor& color, bool skipMoveValidation) {
 			}
 		}
 	}
+
 	return false;
 }
 
 std::vector<Position> Board::getValidMoves(const std::vector<Position>& candidate_moves, Piece* moving_piece) {
 	if (!moving_piece) {
-		return std::vector<Position>{};
+		return {};
 	}
 
 	std::vector<Position> valid_moves;
@@ -242,6 +245,14 @@ std::vector<Position> Board::getValidatedPawnMoves(const std::vector<Position>& 
 
 const std::vector<std::unique_ptr<Piece>>& Board::getCapturedPieces(const ChessColor& color) const {
 	return (color == ChessColor::White ? white_captured : black_captured);
+}
+
+bool Board::isValidMove(const Position& position) {
+	return std::find(valid_moves.begin(), valid_moves.end(), position) != valid_moves.end();
+}
+
+const Piece* Board::getSelectedPiece() const {
+	return selected_piece;
 }
 
 void Board::selectPiece(const Position& position) {
@@ -365,6 +376,16 @@ void Board::updateTileStates(const float& dt) {
 			tile_states[row][col] = computeTileState(Position(row, col));
 		}
 	}
+
+	if (isKingChecked(ChessColor::White, true)) {
+		auto position = getKingPosition(ChessColor::White);
+		tile_states[position.row][position.col] = TileState::Attacked;
+	}
+
+	if (isKingChecked(ChessColor::Black, true)) {
+		auto position = getKingPosition(ChessColor::Black);
+		tile_states[position.row][position.col] = TileState::Attacked;
+	}
 }
 
 std::string Board::getTileOverlayName(const Position& position) {
@@ -386,8 +407,6 @@ TileState Board::computeTileState(const Position& position) {
 	if ((last_move) && (last_move->from == position || last_move->to == position)) {
 		return TileState::LastMove;
 	} // handle last move
-
-	// TODO: handle king attacked
 
 	auto find_position = std::find(valid_moves.begin(), valid_moves.end(), position);
 
