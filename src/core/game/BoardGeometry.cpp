@@ -32,6 +32,7 @@ Position BoardGeometry::getTileBoardPosition(const sf::Vector2i& position) {
 
 	float tile_x = position_f.x - tile_start_x;
 	float tile_y = position_f.y - tile_start_y;
+
 	return {
 		(int) tile_y / (int) tile_size,
 		(int) tile_x / (int) tile_size
@@ -52,6 +53,13 @@ float BoardGeometry::getBoardX() const {
 
 float BoardGeometry::getMargin() const {
 	return margin;
+}
+
+bool BoardGeometry::isInsideBoardTiles(const sf::Vector2i& position) const {
+	float tile_end_x = tile_start_x + 8 * tile_size;
+	float tile_end_y = tile_start_y + 8 * tile_size;
+	return position.x >= tile_start_x && position.x <= tile_end_x
+		&& position.y >= tile_start_y && position.y <= tile_end_y;
 }
 
 void BoardGeometry::setMarginPercent(const float& percent) {

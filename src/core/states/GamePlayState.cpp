@@ -42,7 +42,19 @@ void GamePlayState::handleInput(const InputManager& input_manager) {
 	}
 
 	if (input_manager.isMouseButtonJustPressed(sf::Mouse::Button::Left)) {
-		Position selected_position = board->getGeometry().getTileBoardPosition(input_manager.getMousePosition());
-		board->selectPiece(selected_position);
+		auto mouse_position = input_manager.getMousePosition();
+
+		if (board->getGeometry().isInsideBoardTiles(mouse_position)) {
+			Position selected_position = board->getGeometry().getTileBoardPosition(input_manager.getMousePosition());
+
+			auto selected_piece = board->getSelectedPiece();
+
+			if (selected_piece && board->isValidMove(selected_position)) {
+				board->makeMove(Move(selected_piece->getPosition(), selected_position, board->getPieceAt(selected_position).get()));
+				return;
+			}
+
+			board->selectPiece(selected_position);
+		}
 	}
 }

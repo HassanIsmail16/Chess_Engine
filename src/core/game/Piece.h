@@ -25,6 +25,7 @@ public:
     void setPosition(const Position new_position);
     std::unique_ptr<Piece> clone() const;
     Position getPosition();
+    Position getPosition() const;
 
     void incrementMoveCount();
     void decrementMoveCount();
@@ -35,7 +36,6 @@ public:
     bool canBeObstructed() const;
     PieceType getType() const;
     ChessColor getColor();
-    Position getPosition() const;
     std::string getPieceCode();
 
 private:

@@ -37,6 +37,9 @@ public:
     
     const std::vector<std::unique_ptr<Piece>>& getCapturedPieces(const ChessColor& color) const;
 
+    bool isValidMove(const Position& position);
+    const Piece* getSelectedPiece() const;
+
     void selectPiece(const Position& position);
     void unselectPiece();
 
@@ -69,6 +72,8 @@ private:
     bool isValidPawnCapture(const Position& from, const Position& to, const ChessColor& king_color);
 
     Position getEnPassantMove(Piece* moving_piece);
+
+    bool canCastle(const ChessColor& color, bool king_side);
 
     Position getKingPosition(const ChessColor& color);
 
