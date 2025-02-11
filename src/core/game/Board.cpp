@@ -113,7 +113,20 @@ bool Board::isKingChecked(const ChessColor& color, bool skipMoveValidation) {
 			// Skip full move validation when checking if a move would expose the king
 			if (skipMoveValidation) {
 				auto attack = std::find(possible_moves.begin(), possible_moves.end(), king_position);
-				if (attack != possible_moves.end() && !isPathObstructed(current_piece->getPosition(), king_position)) {
+				if (attack == possible_moves.end()) {
+					continue;
+				}
+
+				// handle pawn attacks	
+				if (current_piece->getType() == PieceType::Pawn) {
+					if (isValidPawnCapture(current_piece->getPosition(), king_position, current_piece->getColor())) {
+						return true;
+					} 
+					continue;
+				}
+				
+				// handle other attacks
+				if (!isPathObstructed(current_piece->getPosition(), king_position)) {
 					return true;
 				}
 			} else {
@@ -470,7 +483,12 @@ bool Board::isValidPawnStep(const Position& from, const Position& to, const Ches
 
 bool Board::isValidPawnCapture(const Position& from, const Position& to, const ChessColor& king_color) {
 	ChessColor opponent_color = (king_color == ChessColor::White ? ChessColor::Black : ChessColor::White);
-	return isValidPawnStep(from, to, king_color) && hasPieceAt(to) && getPieceAt(to)->getColor() == opponent_color;
+	
+	if (abs(from.row - to.row) != 1 || abs(from.col - to.col) != 1) {
+		return false;
+	}
+
+	return isInBounds(to) && !willExposeKing(from, to, king_color) && hasPieceAt(to) && getPieceAt(to)->getColor() == opponent_color;
 }
 
 Position Board::getEnPassantMove(Piece* moving_piece) {
