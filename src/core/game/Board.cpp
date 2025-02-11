@@ -59,7 +59,10 @@ void Board::render(sf::RenderWindow& window) {
 }
 
 void Board::makeMove(const Move& move) {
-	auto& moving_piece = getPieceAt(move.from);
+	auto& moving_piece = getPieceAt(move.from);	
+	if (!moving_piece) {
+		return;
+	}
 	moving_piece->setPosition(move.to);
 	moving_piece->incrementMoveCount();
 	selected_piece = nullptr;
@@ -206,11 +209,11 @@ std::vector<Position> Board::getValidPawnMoves(const std::vector<Position>& cand
 	if (isValidPawnCapture(moving_piece_position, left_capture, moving_piece_color)) {
 		valid_pawn_moves.emplace_back(left_capture);
 	}
-	
+
 	// En passant
 	Position en_passant_move = getEnPassantMove(moving_piece);
 	if (isInBounds(en_passant_move)) {
-		valid_pawn_moves.emplace_back(left_capture);
+		valid_pawn_moves.emplace_back(en_passant_move);
 	}
 
 	return valid_pawn_moves;
@@ -471,30 +474,34 @@ bool Board::isValidPawnCapture(const Position& from, const Position& to, const C
 }
 
 Position Board::getEnPassantMove(Piece* moving_piece) {
+	Position invalid_move = { -1, -1 };
+
 	// moving piece data
 	ChessColor moving_piece_color = moving_piece->getColor();
 	ChessColor opponent_color = (moving_piece_color == ChessColor::White ? ChessColor::Black : ChessColor::White);
 	Position moving_piece_position = moving_piece->getPosition();
 
 	// last moved piece data
+	if (!last_move) {
+		return invalid_move;
+	}
+
 	auto& last_moved_piece = getPieceAt(last_move->to);
 	ChessColor last_moved_piece_color = last_moved_piece->getColor();
 	PieceType last_moved_piece_type = last_moved_piece->getType();
 	Position last_moved_piece_position = last_moved_piece->getPosition();
 
-	Position invalid_move = { -1, -1 };
-
 	if (last_moved_piece_type != PieceType::Pawn || last_moved_piece_color != opponent_color) {
 		return invalid_move;
 	} // The en passant capture must be performed on the turn immediately after the pawn being captured moves.
-
+	
 	int vertical_distance = abs(last_move->from.row - last_move->to.row);
 	if (vertical_distance != 2) {
 		return invalid_move;
 	} // The captured pawn must have moved two squares in one move, landing right next to the capturing pawn.
 
 	int en_passant_row = (moving_piece_color == ChessColor::White ? 4 : 3);
-	if (last_moved_piece_position.row != en_passant_row) {
+	if (last_moved_piece_position.row != en_passant_row || last_moved_piece_position.row != moving_piece_position.row) {
 		return invalid_move;
 	} // The en passante can only be done on this row
 
@@ -506,10 +513,9 @@ Position Board::getEnPassantMove(Piece* moving_piece) {
 	// Calculate en passant move
 	int direction = (moving_piece_color == ChessColor::White ? 1 : -1);
 	Position en_passant_move(moving_piece_position.row + direction, last_moved_piece_position.col, PositionType::EnPassant);
-	if (isInBounds(en_passant_move) && !willExposeKing(en_passant_move, moving_piece_position, moving_piece_color) && !willCaptureKing(en_passant_move)) {
+	if (isInBounds(en_passant_move) && !willExposeKing(moving_piece_position, en_passant_move, moving_piece_color) && !willCaptureKing(en_passant_move)) {
 		return en_passant_move;
 	}
-
 
 	return invalid_move;
 }
@@ -540,20 +546,13 @@ bool Board::canCastle(const ChessColor& color, bool king_side) {
 
 	// path between king and rook is not safe
 	int rook_direction = (king_side ? 1 : -1);
-	auto willKingBeExposed = [&color, &king_position, this](const Position& position) -> bool {
-		Board temp(*this);
-		temp.makeMove(Move(king_position, position, nullptr));
-		return temp.isKingChecked(color, true);
-		};
-
-	if (willKingBeExposed(Position(king_position.row, king_position.col + rook_direction))
-		|| willKingBeExposed(Position(king_position.row, king_position.col + rook_direction * 2))) {
+	if (willExposeKing(king_position, Position(king_position.row, king_position.col + rook_direction), color)
+		|| willExposeKing(king_position, Position(king_position.row, king_position.col + rook_direction * 2), color)) {
 		return false;
 	}
 
 	return true;
 }
-
 
 Position Board::getKingPosition(const ChessColor& color) {
 	for (int row = 0; row < 8; row++) {
