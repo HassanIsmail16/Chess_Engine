@@ -14,6 +14,8 @@ public:
 	float getBoardX() const;
 	float getMargin() const;
 
+	bool isInsideBoardTiles(const sf::Vector2i& position) const;
+
 	void setMarginPercent(const float& percent);
 
 private:
