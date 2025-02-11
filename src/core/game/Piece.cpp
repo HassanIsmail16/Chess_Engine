@@ -31,7 +31,6 @@ void Piece::setPosition(const Position new_position) {
 	current_position = new_position;
 }
 
-
 std::unique_ptr<Piece> Piece::clone() const {
 	return std::make_unique<Piece>(*this);
 }
@@ -150,8 +149,8 @@ std::vector<Position> Piece::getPawnPossibleMoves() const {
 	return {
 		{row + direction, col}, // single step
 		{row + 2 * direction, col}, // double step
-		{row, col + 1}, // right capture
-		{row, col - 1} // left capture
+		{row + direction, col + 1}, // right capture
+		{row + direction, col - 1} // left capture
 	};
 }
 

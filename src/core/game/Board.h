@@ -29,8 +29,12 @@ public:
     std::unique_ptr<Piece>& getPieceAt(const Position& position);
     void setPieceAt(const Position& position, std::unique_ptr<Piece> new_piece);
 
-    bool isKingChecked(const ChessColor& color);
+    bool isKingChecked(const ChessColor& color, bool skipMoveValidation = false);
 
+    std::vector<Position> getValidMoves(std::vector<Position>& candidate_moves, Piece* moving_piece);
+
+    std::vector<Position> getValidatedPawnMoves(std::vector<Position>& candidate_moves, Piece* moving_piece);
+    
     const std::vector<std::unique_ptr<Piece>>& getCapturedPieces(const ChessColor& color) const;
 
     void selectPiece(const Position& position);
@@ -41,11 +45,10 @@ public:
 
     uint64_t computeHash() const;
 
+    BoardGeometry& getGeometry();
+
 private:
     void initializeBoard();
-
-    std::vector<Position> getValidMoves(std::vector<Position>& candidate_moves, Piece* moving_piece);
-    std::vector<Position> getValidatedPawnMoves(std::vector<Position>& candidate_moves, Piece* moving_piece);
 
     void renderBoard(sf::RenderWindow& window);
     void renderTiles(sf::RenderWindow& window);
@@ -79,3 +82,4 @@ private:
 
     BoardGeometry geometry;
 };
+

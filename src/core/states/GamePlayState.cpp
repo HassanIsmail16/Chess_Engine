@@ -41,9 +41,15 @@ void GamePlayState::handleInput(const InputManager& input_manager) {
 		);
 	}
 
-	// testing piece selection
+	// testing piece selections
+	static int col = 0, row = 0;
+	if (input_manager.isKeyJustPressed(sf::Keyboard::Right)) col++;
+	if (input_manager.isKeyJustPressed(sf::Keyboard::Left)) col--;
+	if (input_manager.isKeyJustPressed(sf::Keyboard::Up)) row--;
+	if (input_manager.isKeyJustPressed(sf::Keyboard::Down)) row++;
+
 	if (input_manager.isMouseButtonJustPressed(sf::Mouse::Button::Left)) {
-		board->selectPiece(Position(0, 0));
+		board->selectPiece(Position(row, col));
 	}
 
 	if (input_manager.isMouseButtonJustPressed(sf::Mouse::Button::Right)) {
