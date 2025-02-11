@@ -217,11 +217,11 @@ std::vector<Position> Board::getValidPawnMoves(const std::vector<Position>& cand
 	}
 
 	// Regular captures
-	if (isValidPawnCapture(moving_piece_position, right_capture, moving_piece_color)) {
+	if (!hasKingAt(right_capture) && isValidPawnCapture(moving_piece_position, right_capture, moving_piece_color)) {
 		valid_pawn_moves.emplace_back(right_capture);
 	}
 
-	if (isValidPawnCapture(moving_piece_position, left_capture, moving_piece_color)) {
+	if (!hasKingAt(left_capture) && isValidPawnCapture(moving_piece_position, left_capture, moving_piece_color)) {
 		valid_pawn_moves.emplace_back(left_capture);
 	}
 
@@ -491,6 +491,10 @@ bool Board::isValidPawnCapture(const Position& from, const Position& to, const C
 	}
 
 	return isInBounds(to) && !willExposeKing(from, to, king_color) && hasPieceAt(to) && getPieceAt(to)->getColor() == opponent_color;
+}
+
+bool Board::hasKingAt(const Position& position) {
+	return hasPieceAt(position) && getPieceAt(position)->getType() == PieceType::King;
 }
 
 Position Board::getEnPassantMove(Piece* moving_piece) {

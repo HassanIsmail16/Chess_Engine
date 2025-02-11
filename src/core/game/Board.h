@@ -70,6 +70,7 @@ private:
     bool willExposeKing(const Position& from, const Position& to, const ChessColor& king_color);
     bool isValidPawnStep(const Position& from, const Position& to, const ChessColor& king_color);
     bool isValidPawnCapture(const Position& from, const Position& to, const ChessColor& king_color);
+    bool hasKingAt(const Position& position);
 
     Position getEnPassantMove(Piece* moving_piece);
 
