@@ -2,9 +2,20 @@
 #include "../log/Logger.hpp"
 
 Piece::Piece(PieceType type, ChessColor color, Position position) : 
-	type(type), color(color), current_position(position), move_count(0) {
+	type(type), 
+	color(color), 
+	current_position(position), 
+	move_count(0) {
 	sprite = AssetManager::getInstance().getSprite(getPieceCode());
 }
+
+Piece::Piece(const Piece& other) : 
+	type(other.type), 
+	color(other.color), 
+	current_position(other.current_position), 
+	move_count(other.move_count), 
+	sprite(other.sprite)
+{}
 
 void Piece::update(const float& dt) {
 	return;
@@ -16,6 +27,10 @@ void Piece::render(sf::RenderWindow& window) {
 
 void Piece::setPosition(const Position new_position) {
 	current_position = new_position;
+}
+
+std::unique_ptr<Piece> Piece::clone() const {
+	return std::make_unique<Piece>(*this);
 }
 
 void Piece::incrementMoveCount() {
@@ -68,6 +83,10 @@ bool Piece::hasMoved() const {
 	return move_count;
 }
 
+bool Piece::canBeObstructed() const {
+	return (type == PieceType::Rook || type == PieceType::Bishop || type == PieceType::Queen);
+}
+
 PieceType Piece::getType() const {
 	return type;
 }
@@ -76,6 +95,9 @@ ChessColor Piece::getColor() const {
 	return color;
 }
 
+Position Piece::getPosition() const {
+	return current_position;
+}
 std::string Piece::getPieceCode() {
 	std::string type_code;
 	

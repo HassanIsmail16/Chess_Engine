@@ -3,10 +3,12 @@
 #include "BoardUtilities.h"
 #include "../GameObject.h"
 #include <array>
+#include <cmath>
 
 class Board : public GameObject {
 public:
     Board();
+    Board(const Board& other);
 
     void update(const float& dt) override;
     void render(sf::RenderWindow& window) override;
@@ -33,12 +35,18 @@ private:
     void initializeBoard();
 
     std::vector<Position> getValidMoves(std::vector<Position>& candidate_moves, Piece* moving_piece);
+    std::vector<Position> getValidatedPawnMoves(std::vector<Position>& candidate_moves, Piece* moving_piece);
 
     void renderBoard(sf::RenderWindow& window);
     void renderTiles(sf::RenderWindow& window);
     void renderPieces(sf::RenderWindow& window);
 
     bool isInBounds(const Position& position) const;
+    bool hasFriendlyPiece(const Position& position, const ChessColor& color) const;
+    bool willCaptureKing(const Position& position) const;
+    bool isPathObstructed(const Position& from, const Position& to) const;
+    bool hasPieceAt(const Position& position) const;
+    bool willExposeKing(const Position& from, const Position& to, const ChessColor& color) const;
 
     Position getKingPosition(const ChessColor& color);
 

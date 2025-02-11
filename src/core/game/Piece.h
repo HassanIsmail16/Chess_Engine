@@ -16,11 +16,13 @@ enum class PieceType {
 class Piece : public GameObject {
 public:
     Piece(PieceType, ChessColor, Position);
+    Piece(const Piece& other);
 
     void update(const float& dt) override;
     void render(sf::RenderWindow& window) override;
 
     void setPosition(const Position new_position);
+    std::unique_ptr<Piece> clone() const;
 
     void incrementMoveCount();
     void decrementMoveCount();
@@ -28,9 +30,10 @@ public:
     std::vector<Position> getPossibleMoves() const;
 
     bool hasMoved() const;
+    bool canBeObstructed() const;
     PieceType getType() const;
     ChessColor getColor() const;
-
+    Position getPosition() const;
     std::string getPieceCode();
 
 private:
