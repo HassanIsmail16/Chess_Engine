@@ -69,6 +69,8 @@ private:
     bool hasPieceAt(const Position& position);
     bool willExposeKing(const Position& from, const Position& to, const ChessColor& color);
 
+    bool canCastle(const ChessColor& color, bool king_side);
+
     Position getKingPosition(const ChessColor& color);
 
     std::array<std::array<std::unique_ptr<Piece>, 8>, 8> board;

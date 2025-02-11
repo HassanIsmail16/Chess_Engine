@@ -65,6 +65,7 @@ void Board::makeMove(const Move& move) {
 	selected_piece = nullptr;
 	valid_moves.clear();
 	setPieceAt(move.to, std::move(moving_piece));
+	last_move = new Move(move);
 }
 
 void Board::undoLastMove() {
@@ -159,6 +160,17 @@ std::vector<Position> Board::getValidMoves(const std::vector<Position>& candidat
 		}
 
 		valid_moves.emplace_back(candidate_move);
+	}
+
+	// handle castling
+	if (moving_piece->getType() == PieceType::King) {
+		if (canCastle(moving_piece_color, true)) {
+			valid_moves.emplace_back(moving_piece_position.row, moving_piece_position.col + 2, PositionType::KingSideCastle);
+		}
+
+		if (canCastle(moving_piece_color, false)) {
+			valid_moves.emplace_back(moving_piece_position.row, moving_piece_position.col - 2, PositionType::QueenSideCastle);
+		}
 	}
 
 	return valid_moves;
@@ -404,9 +416,6 @@ TileState Board::computeTileState(const Position& position) {
 		return TileState::Selected;
 	} // handle selected piece
 
-	if ((last_move) && (last_move->from == position || last_move->to == position)) {
-		return TileState::LastMove;
-	} // handle last move
 
 	auto find_position = std::find(valid_moves.begin(), valid_moves.end(), position);
 
@@ -417,10 +426,17 @@ TileState Board::computeTileState(const Position& position) {
 			return TileState::Attacked;
 		}
 
-		// TODO: handle special moves
+		if (find_position->type == PositionType::EnPassant || find_position->type == PositionType::KingSideCastle
+			|| find_position->type == PositionType::QueenSideCastle) {
+			return TileState::Special;
+		}
 
 		return TileState::Highlighted;
 	}
+
+	if ((last_move) && (last_move->from == position || last_move->to == position)) {
+		return TileState::LastMove;
+	} // handle last move
 
 	return TileState::None;
 }
@@ -478,6 +494,46 @@ bool Board::willExposeKing(const Position& from, const Position& to, const Chess
 	Move move(from, to, nullptr);
 	copy.makeMove(move);
 	return copy.isKingChecked(color);
+}
+
+bool Board::canCastle(const ChessColor& color, bool king_side) {
+	// get king
+	auto king_position = getKingPosition(color);
+	auto& king = getPieceAt(king_position);
+
+	// king not moved
+	if (king->hasMoved()) {
+		return false;
+	}
+
+	// get rook
+	auto rook_position = Position(king_position.row, (king_side ? 7 : 0));
+	auto& rook = getPieceAt(rook_position);
+
+	// rook moved or not found in place
+	if (!rook || rook->hasMoved()) {
+		return false;
+	}
+
+	// path between king and rook is obstructed
+	if (isPathObstructed(king_position, rook_position)) {
+		return false;
+	}
+
+	// path between king and rook is not safe
+	int rook_direction = (king_side ? 1 : -1);
+	auto willKingBeExposed = [&color, &king_position, this](const Position& position) -> bool {
+		Board temp(*this);
+		temp.makeMove(Move(king_position, position, nullptr));
+		return temp.isKingChecked(color, true);
+		};
+
+	if (willKingBeExposed(Position(king_position.row, king_position.col + rook_direction))
+		|| willKingBeExposed(Position(king_position.row, king_position.col + rook_direction * 2))) {
+		return false;
+	}
+
+	return true;
 }
 
 
