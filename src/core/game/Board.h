@@ -91,4 +91,3 @@ private:
 
     BoardGeometry geometry;
 };
-

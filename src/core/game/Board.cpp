@@ -46,6 +46,8 @@ Board::Board(const Board& other) {
 
 	valid_moves = other.valid_moves;
 	is_white_side = other.is_white_side;
+
+	tile_states = other.tile_states;
 }
 
 void Board::update(const float& dt) {
@@ -126,7 +128,8 @@ bool Board::isKingChecked(const ChessColor& color, bool skipMoveValidation) {
 				}
 				
 				// handle other attacks
-				if (!isPathObstructed(current_piece->getPosition(), king_position)) {
+				if (!isPathObstructed(current_piece->getPosition(), king_position)
+					|| current_piece->getType() == PieceType::Knight) {
 					return true;
 				}
 			} else {
@@ -180,7 +183,6 @@ std::vector<Position> Board::getValidMoves(const std::vector<Position>& candidat
 		if (canCastle(moving_piece_color, true)) {
 			valid_moves.emplace_back(moving_piece_position.row, moving_piece_position.col + 2, PositionType::KingSideCastle);
 		}
-
 		if (canCastle(moving_piece_color, false)) {
 			valid_moves.emplace_back(moving_piece_position.row, moving_piece_position.col - 2, PositionType::QueenSideCastle);
 		}
