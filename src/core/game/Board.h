@@ -1,11 +1,10 @@
 #pragma once
 
+#include "BoardGeometry.h"
 #include "BoardUtilities.h"
+#include "Piece.h"
 #include "../GameObject.h"
 #include <array>
-#include <cmath>
-#include "Piece.h"
-#include "BoardGeometry.h"
 
 enum class TileState {
     None,
