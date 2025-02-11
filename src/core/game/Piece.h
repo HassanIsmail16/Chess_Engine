@@ -3,6 +3,7 @@
 #include "BoardUtilities.h"
 #include "../GameObject.h"
 #include "../managers/AssetManager.h"
+#include "BoardGeometry.h"
 
 enum class PieceType {
     Pawn,
@@ -13,16 +14,17 @@ enum class PieceType {
     King
 };
 
-class Piece : public GameObject {
+class Piece {
 public:
     Piece(PieceType, ChessColor, Position);
     Piece(const Piece& other);
 
-    void update(const float& dt) override;
-    void render(sf::RenderWindow& window) override;
+    void update(const float& dt);
+    void render(sf::RenderWindow& window, const BoardGeometry& geometry);
 
     void setPosition(const Position new_position);
     std::unique_ptr<Piece> clone() const;
+    Position getPosition();
 
     void incrementMoveCount();
     void decrementMoveCount();

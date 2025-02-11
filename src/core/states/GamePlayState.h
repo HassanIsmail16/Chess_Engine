@@ -1,9 +1,12 @@
 #pragma once
 
 #include "State.h"
+#include "../game/Board.h"
+#include <memory>
 
 class GamePlayState : public State {
 public:
+	GamePlayState();
 	void run(const float& dt, sf::RenderWindow& window, const InputManager& input_manager) override;
 	void exit() override;
 	std::string getName() const override;
@@ -13,4 +16,6 @@ private:
 	void update(const float& dt) override;
 	void render(sf::RenderWindow& window) override;
 	void handleInput(const InputManager& input_manager) override;
+
+	std::unique_ptr<Board> board;
 };

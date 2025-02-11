@@ -21,16 +21,23 @@ void Piece::update(const float& dt) {
 	return;
 }
 
-void Piece::render(sf::RenderWindow& window) {
-	return;
+void Piece::render(sf::RenderWindow& window, const BoardGeometry& geometry) {
+	auto tile_position = geometry.getTilePosition(current_position);
+	sprite.setPosition(tile_position.x + 3, tile_position.y + 3);
+	window.draw(sprite);
 }
 
 void Piece::setPosition(const Position new_position) {
 	current_position = new_position;
 }
 
+
 std::unique_ptr<Piece> Piece::clone() const {
 	return std::make_unique<Piece>(*this);
+}
+
+Position Piece::getPosition() {
+	return current_position;
 }
 
 void Piece::incrementMoveCount() {
@@ -102,13 +109,33 @@ std::string Piece::getPieceCode() {
 	std::string type_code;
 	
 	switch (type) {
-		case PieceType::Pawn: type_code = "pawn";
-		case PieceType::Rook: type_code = "rook";
-		case PieceType::Knight: type_code = "knight";
-		case PieceType::Bishop: type_code = "bishop";
-		case PieceType::Queen: type_code = "queen";
-		case PieceType::King: type_code = "king";
-		default: type_code = "unknown";
+		case PieceType::Pawn: 
+		type_code = "pawn";
+		break;
+
+		case PieceType::Rook: 
+		type_code = "rook";
+		break;
+
+		case PieceType::Knight: 
+		type_code = "knight";
+		break;
+
+		case PieceType::Bishop: 
+		type_code = "bishop";
+		break;
+
+		case PieceType::Queen: 
+		type_code = "queen";
+		break;
+
+		case PieceType::King: 
+		type_code = "king";
+		break;
+
+		default: 
+		type_code = "unknown";
+		break;
 	}
 
 	std::string color_code = (color == ChessColor::White ? "w" : "b");
