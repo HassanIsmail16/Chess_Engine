@@ -276,16 +276,16 @@ TileState Board::computeTileState(const Position& position) {
 
 std::vector<Position> Board::getValidMoves(std::vector<Position>& candidate_moves, Piece* moving_piece) {
 	if (!moving_piece) {
-		return std::vector<Position>{};
+		return valid_moves;
 	}
 
-	std::vector<Position> valid_moves;
 	ChessColor moving_piece_color = moving_piece->getColor();
 	PieceType moving_piece_type = moving_piece->getType();
 	Position moving_piece_position = moving_piece->getPosition();
 
 	if (moving_piece_type == PieceType::Pawn) {
-		valid_moves = getValidatedPawnMoves(candidate_moves, moving_piece);
+		std::vector<Position> valid_pawn_moves = getValidatedPawnMoves(candidate_moves, moving_piece);
+		MERGE_VECTORS(valid_moves, valid_pawn_moves);
 		return valid_moves;
 	} // Including En Passant
 
