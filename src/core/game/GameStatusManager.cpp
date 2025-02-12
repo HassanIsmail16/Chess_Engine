@@ -137,6 +137,5 @@ int GameStatusManager::getTurnCount() const {
 }
 
 std::string GameStatusManager::cleanUpHash(const std::string& board_hash) {
-	// TODO: implement
-	return board_hash;
+	return board_hash.substr(0, board_hash.find(' '));
 }

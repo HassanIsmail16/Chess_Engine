@@ -21,6 +21,13 @@ void BoardGeometry::update(const sf::RenderWindow& window) {
 }
 
 sf::Vector2f BoardGeometry::getTilePosition(const Position& position) const {
+	if (is_white_side) {
+		return {
+			tile_size * position.col + tile_start_x,
+			tile_size * (7 - position.row) + tile_start_y
+		};
+	} 
+
 	return {
 		tile_size * position.col + tile_start_x,
 		tile_size * position.row + tile_start_y
@@ -32,6 +39,13 @@ Position BoardGeometry::getTileBoardPosition(const sf::Vector2i& position) {
 
 	float tile_x = position_f.x - tile_start_x;
 	float tile_y = position_f.y - tile_start_y;
+
+	if (is_white_side) {
+		return {
+			7 - (int) tile_y / (int) tile_size,
+			(int) tile_x / (int) tile_size
+		};
+	}
 
 	return {
 		(int) tile_y / (int) tile_size,
@@ -64,4 +78,12 @@ bool BoardGeometry::isInsideBoardTiles(const sf::Vector2i& position) const {
 
 void BoardGeometry::setMarginPercent(const float& percent) {
 	margin_percent = percent;
+}
+
+void BoardGeometry::flip() {
+	is_white_side = !is_white_side;
+}
+
+bool BoardGeometry::isWhiteSide() const {
+	return is_white_side;
 }

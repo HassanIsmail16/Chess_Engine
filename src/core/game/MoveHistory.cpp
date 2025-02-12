@@ -93,7 +93,14 @@ const Move& MoveHistory::getLastMove() const {
 }
 
 void MoveHistory::render(sf::RenderWindow& window) {
-
+	sf::Sprite sprite = AssetManager::getInstance().getSprite("move-history-body");
+	
+	margin = window.getSize().x * 0.05f;
+	x = margin;
+	y = margin + window.getSize().y * (0.093f + 0.172f + 0.027f);
+	sprite.setPosition(x, y);
+	
+	window.draw(sprite);
 }
 
 void MoveHistory::recordCastlingMove(const Move& move, const std::string& hash) {

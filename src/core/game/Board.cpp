@@ -35,8 +35,6 @@ Board& Board::operator=(const Board& other) {
 Board::~Board() {
 	clear();
 }
-
-
 void Board::update(const float& dt) {
 	updateTileStates(dt);
 }
@@ -322,11 +320,11 @@ void Board::unselectPiece() {
 }
 
 bool Board::isWhiteSide() const {
-	return is_white_side;
+	return geometry.isWhiteSide();
 }
 
 void Board::flip() {
-	is_white_side = false;
+	geometry.flip();
 }
 
 std::string Board::computeHash(int turn_count) {
@@ -454,7 +452,6 @@ void Board::copy(const Board& other) {
 	}
 
 	valid_moves = other.valid_moves;
-	is_white_side = other.is_white_side;
 	halfmove_clock = other.halfmove_clock;
 
 	tile_states = other.tile_states;

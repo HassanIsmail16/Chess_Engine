@@ -112,7 +112,6 @@ private:
 
     std::array<std::array<TileState, 8>, 8> tile_states;
 
-    bool is_white_side; // to track board orientation
     int halfmove_clock;
     BoardGeometry geometry;
 };

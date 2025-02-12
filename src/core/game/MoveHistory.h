@@ -39,5 +39,18 @@ private:
 	void recordCastlingMove(const Move& move, const std::string& hash);
 	int current_index;
 	std::vector<MoveEntry> moves;
+
+	float margin_percent = 0.05;
+	float margin;
+	float sprite_size;
+	float width;
+	float height;
+	float scale;
+	float x;
+	float y;
+	float frame_margin;
+	float body_size;
+	float body_start_X;
+	float body_start_y;
 };
 
