@@ -30,7 +30,8 @@ std::string GamePlayState::getName() const {
 }
 
 void GamePlayState::update(const float& dt) {
-	board->update(dt);
+	Move* last_move = (history->isEmpty() ? nullptr : new Move(history->getLastMove()));
+	board->update(dt, last_move);
 	return;
 }
 

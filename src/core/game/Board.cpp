@@ -50,7 +50,8 @@ Board::Board(const Board& other) {
 	tile_states = other.tile_states;
 }
 
-void Board::update(const float& dt) {
+void Board::update(const float& dt, const Move* last_move) {
+	this->last_move = last_move;
 	updateTileStates(dt);
 }
 

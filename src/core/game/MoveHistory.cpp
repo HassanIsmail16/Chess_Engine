@@ -75,8 +75,21 @@ int MoveHistory::getTotalMoves() {
 	return moves.size();
 }
 
+bool MoveHistory::isEmpty() const {
+	return moves.empty();
+}
+
 const std::vector<MoveEntry>& MoveHistory::getMoveHistory() const {
 	return moves;
+}
+
+const Move& MoveHistory::getLastMove() const {
+	if (moves.empty()) {
+		LOG_ERROR("Attempted to get last move on an empty move history vector")
+		throw std::runtime_error("Invalid Move History Acesss");
+	}
+
+	return moves.back().move;
 }
 
 void MoveHistory::recordCastlingMove(const Move& move, const std::string& hash) {

@@ -20,7 +20,7 @@ public:
     Board();
     Board(const Board& other);
 
-    void update(const float& dt);
+    void update(const float& dt, const Move* last_move);
     void render(sf::RenderWindow& window);
 
     void makeMove(const Move& move);
@@ -85,7 +85,7 @@ private:
 
     Piece* selected_piece;
     std::vector<Position> valid_moves;
-    Move* last_move;
+    const Move* last_move;
 
     std::array<std::array<TileState, 8>, 8> tile_states;
 

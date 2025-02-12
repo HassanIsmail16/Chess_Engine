@@ -30,7 +30,9 @@ public:
 	void reset();
 	int getCurrentMoveIndex();
 	int getTotalMoves();
+	bool isEmpty() const;
 	const std::vector<MoveEntry>& getMoveHistory() const;
+	const Move& getLastMove() const;
 
 	void render(sf::RenderWindow& window);
 private:
