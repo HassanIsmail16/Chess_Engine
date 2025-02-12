@@ -430,7 +430,7 @@ bool Board::hasFriendlyPiece(const Position& position, const ChessColor& color) 
 
 
 bool Board::hasKingAt(const Position& position) {
-	return hasPieceAt(position) && getPieceAt(position)->getType() == PieceType::King;
+	return isInBounds(position) && hasPieceAt(position) && getPieceAt(position)->getType() == PieceType::King;
 }
 
 bool Board::isPathObstructed(const Position& from, const Position& to) {
