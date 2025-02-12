@@ -64,13 +64,12 @@ private:
 
     bool isInBounds(const Position& position) const;
     bool hasFriendlyPiece(const Position& position, const ChessColor& color);
-    bool willCaptureKing(const Position& position);
+    bool hasKingAt(const Position& position);
     bool isPathObstructed(const Position& from, const Position& to);
     bool hasPieceAt(const Position& position);
     bool willExposeKing(const Position& from, const Position& to, const ChessColor& king_color);
     bool isValidPawnStep(const Position& from, const Position& to, const ChessColor& king_color);
     bool isValidPawnCapture(const Position& from, const Position& to, const ChessColor& king_color);
-    bool hasKingAt(const Position& position);
 
     Position getEnPassantMove(Piece* moving_piece);
 
