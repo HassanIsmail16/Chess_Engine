@@ -46,7 +46,7 @@ public:
     bool isWhiteSide() const;
     void flip();
 
-    uint64_t computeHash() const;
+    std::string computeHash();
 
     BoardGeometry& getGeometry();
 
@@ -76,6 +76,12 @@ private:
     bool canCastle(const ChessColor& color, bool king_side);
 
     Position getKingPosition(const ChessColor& color);
+
+    std::string computePlacementField();
+    std::string computeRowPlacement(int row);
+    char getPieceSymbol(const PieceType& type, const ChessColor& color);
+    char getActiveColor();
+    std::string getCastlingRights();
 
     std::array<std::array<std::unique_ptr<Piece>, 8>, 8> board;
     std::vector<std::unique_ptr<Piece>> white_captured;

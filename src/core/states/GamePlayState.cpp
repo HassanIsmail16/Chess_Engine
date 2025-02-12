@@ -57,4 +57,8 @@ void GamePlayState::handleInput(const InputManager& input_manager) {
 			board->selectPiece(selected_position);
 		}
 	}
+
+	if (input_manager.isKeyJustPressed(sf::Keyboard::H)) {
+		board->computeHash();
+	}
 }
