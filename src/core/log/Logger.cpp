@@ -27,13 +27,32 @@ Logger::~Logger() {
 void Logger::internalLog(Level level, const std::string& message, const std::string& file, int line) {
 	std::lock_guard<std::mutex> lock(log_mutex);
 
-	std::string log_entry = std::format("[{}] [{}] [{}:{}]: {}", getTimeStamp(), levelToString(level), file, line, message);
-	std::cout << log_entry << std::endl;
+	// colors
+	const std::string NONE = "\033[0m";
+	const std::string RED = "\033[31m";
+	const std::string YELLOW = "\033[33m";
+	const std::string BLUE = "\033[34m";
+	const std::string GREEN = "\033[32m";
 
+	std::string color;
+	switch (level) {
+		case Level::DEBUG: color = BLUE; break;
+		case Level::INFO: color = GREEN; break;
+		case Level::WARNING: color = YELLOW; break;
+		case Level::ERROR: color = RED; break;
+		default: color = NONE; break;
+	}
+
+	std::string log_entry = std::format("[{}] [{}] [{}:{}]: {}", getTimeStamp(), levelToString(level), file, line, message);
+
+	std::cout << color << log_entry << NONE << std::endl;
+
+	// log to file
 	if (log_to_file && this->file.is_open()) {
 		this->file << log_entry << std::endl;
 	}
 }
+
 
 std::string Logger::getTimeStamp() {
 	auto now = std::time(nullptr);
