@@ -2,6 +2,7 @@
 
 #include "State.h"
 #include "../game/Board.h"
+#include "../game/MoveHistory.h"
 #include <memory>
 
 class GamePlayState : public State {
@@ -18,4 +19,5 @@ private:
 	void handleInput(const InputManager& input_manager) override;
 
 	std::unique_ptr<Board> board;
+	std::unique_ptr<MoveHistory> history;
 };

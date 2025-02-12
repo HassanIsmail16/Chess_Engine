@@ -8,7 +8,11 @@ enum class EventType {
 	GameStartEvent,
 	PushNewStateEvent,
 	PopCurrentStateEvent,
-	ReplaceCurrentStateEvent
+	ReplaceCurrentStateEvent,
+	MoveEvent,
+	UndoMoveEvent,
+	RedoMoveEvent,
+	JumpToMoveEvent
 };
 
 class Event {
@@ -46,4 +50,32 @@ class ReplaceCurrentStateEvent : public Event {
 public:
 	ReplaceCurrentStateEvent(std::unique_ptr<State> new_state) : Event(EventType::ReplaceCurrentStateEvent), new_state(std::move(new_state)) {}
 	std::unique_ptr<State> new_state;
+};
+
+class MoveEvent : public Event {
+public:
+	MoveEvent(const Move& move) : Event(EventType::MoveEvent), move(move) {}
+	Move getMove() const { return move; }
+
+private:
+	Move move;
+};
+
+class UndoMoveEvent : public Event {
+public:
+	UndoMoveEvent() : Event(EventType::UndoMoveEvent) {}
+};
+
+class RedoMoveEvent : public Event {
+public:
+	RedoMoveEvent(): Event(EventType::RedoMoveEvent) {}
+};
+
+class JumpToMoveEvent : public Event {
+public:
+	JumpToMoveEvent(int index) : Event(EventType::JumpToMoveEvent), index(index) {}
+	int getIndex() const { return index; }
+
+private:
+	int index;
 };

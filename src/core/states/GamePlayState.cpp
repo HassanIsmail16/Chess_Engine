@@ -4,6 +4,15 @@
 
 GamePlayState::GamePlayState() {
 	board = std::make_unique<Board>();
+	history = std::make_unique<MoveHistory>();
+
+	// TODO: clean up event subscriptions
+	EventDispatcher::getInstance().subscribe(EventType::MoveEvent, [&](std::shared_ptr<Event> event) {
+		auto move_event = std::dynamic_pointer_cast<MoveEvent>(event);
+		auto move = move_event->getMove();
+		board->makeMove(move);
+		history->recordMove(move, board->computeHash());
+		});
 }
 
 void GamePlayState::run(const float& dt, sf::RenderWindow& window, const InputManager& input_manager) {
@@ -21,7 +30,8 @@ std::string GamePlayState::getName() const {
 }
 
 void GamePlayState::update(const float& dt) {
-	board->update(dt);
+	Move* last_move = (history->isEmpty() ? nullptr : new Move(history->getLastMove()));
+	board->update(dt, last_move);
 	return;
 }
 
@@ -50,8 +60,15 @@ void GamePlayState::handleInput(const InputManager& input_manager) {
 			auto selected_piece = board->getSelectedPiece();
 
 			if (selected_piece && board->isValidMove(selected_position)) {
-				board->makeMove(Move(selected_piece->getPosition(), selected_position, board->getPieceAt(selected_position).get()));
-				return;
+				if (board->isCastlingMove(selected_position)) {
+					selected_position.type = (selected_position.col == 6 ? PositionType::KingSideCastle : PositionType::QueenSideCastle);
+				}
+
+				Move move(selected_piece->getPosition(), selected_position, board->getPieceAt(selected_position).get());
+				
+				EventDispatcher::getInstance().pushEvent(
+					std::make_shared<MoveEvent>(move)
+				);
 			}
 
 			board->selectPiece(selected_position);

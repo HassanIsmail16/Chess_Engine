@@ -50,7 +50,8 @@ Board::Board(const Board& other) {
 	tile_states = other.tile_states;
 }
 
-void Board::update(const float& dt) {
+void Board::update(const float& dt, const Move* last_move) {
+	this->last_move = last_move;
 	updateTileStates(dt);
 }
 
@@ -62,15 +63,25 @@ void Board::render(sf::RenderWindow& window) {
 
 void Board::makeMove(const Move& move) {
 	auto& moving_piece = getPieceAt(move.from);	
+
 	if (!moving_piece) {
 		return;
 	}
+
+	if (move.isCastling()) {
+		LOG_INFO("Applying castling move");
+		makeCastlingMove(move);
+	}
+
 	moving_piece->setPosition(move.to);
+
 	moving_piece->incrementMoveCount();
+	
 	selected_piece = nullptr;
+	
 	valid_moves.clear();
+	
 	setPieceAt(move.to, std::move(moving_piece));
-	last_move = new Move(move);
 }
 
 void Board::undoLastMove() {
@@ -240,6 +251,20 @@ const std::vector<std::unique_ptr<Piece>>& Board::getCapturedPieces(const ChessC
 
 bool Board::isValidMove(const Position& position) {
 	return std::find(valid_moves.begin(), valid_moves.end(), position) != valid_moves.end();
+}
+
+bool Board::isCastlingMove(const Position& position) {
+	auto find_position = std::find(valid_moves.begin(), valid_moves.end(), position);
+	
+	if (find_position == valid_moves.end()) {
+		return false;
+	}
+
+	if (find_position->type == PositionType::KingSideCastle || find_position->type == PositionType::QueenSideCastle) {
+		return true;
+	}
+
+	return false;
 }
 
 const Piece* Board::getSelectedPiece() const {
@@ -545,6 +570,17 @@ Position Board::getEnPassantMove(Piece* moving_piece) {
 	}
 
 	return invalid_move;
+}
+
+void Board::makeCastlingMove(const Move& king_move) {
+	// get rook move data
+	bool is_king_side = king_move.getType() == PositionType::KingSideCastle;
+	Position rook_from(king_move.from.row, (is_king_side ? 7 : 0));
+	Position rook_to(king_move.from.row, (is_king_side ? 5 : 3));
+	Move rook_move(rook_from, rook_to);
+
+	// apply rook move
+	makeMove(rook_move);
 }
 
 bool Board::canCastle(const ChessColor& color, bool king_side) {

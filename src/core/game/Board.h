@@ -20,7 +20,7 @@ public:
     Board();
     Board(const Board& other);
 
-    void update(const float& dt);
+    void update(const float& dt, const Move* last_move);
     void render(sf::RenderWindow& window);
 
     void makeMove(const Move& move);
@@ -38,6 +38,7 @@ public:
     const std::vector<std::unique_ptr<Piece>>& getCapturedPieces(const ChessColor& color) const;
 
     bool isValidMove(const Position& position);
+    bool isCastlingMove(const Position& position);
     const Piece* getSelectedPiece() const;
 
     void selectPiece(const Position& position);
@@ -73,6 +74,7 @@ private:
 
     Position getEnPassantMove(Piece* moving_piece);
 
+    void makeCastlingMove(const Move & king_move);
     bool canCastle(const ChessColor& color, bool king_side);
 
     Position getKingPosition(const ChessColor& color);
@@ -89,7 +91,7 @@ private:
 
     Piece* selected_piece;
     std::vector<Position> valid_moves;
-    Move* last_move;
+    const Move* last_move;
 
     std::array<std::array<TileState, 8>, 8> tile_states;
 
