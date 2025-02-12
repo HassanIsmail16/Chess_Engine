@@ -25,8 +25,11 @@ struct Position {
 };
 
 struct Move {
-    Move(const Position& from, const Position& to, Piece* taken_over): from(from), to(to), taken_over(taken_over) {}
-    const Position from;
-    const Position to;
+    Move() : from(-1, -1), to(-1, -1), taken_over(nullptr) {}
+    Move(const Position& from, const Position& to, Piece* taken_over = nullptr): from(from), to(to), taken_over(taken_over) {}
+    PositionType getType() const { return to.type; }
+    bool isCastling() const { return to.type == PositionType::KingSideCastle || to.type == PositionType::QueenSideCastle;}
+    Position from;
+    Position to;
     Piece* taken_over;
 };
