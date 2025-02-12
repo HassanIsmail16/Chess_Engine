@@ -20,7 +20,13 @@ enum class TileState {
 class Board {
 public:
     Board();
-    Board(const Board& other);
+
+    Board(const std::string& board_hash);
+    Board(const Board& other); 
+
+    Board& operator=(const Board& other);
+
+    ~Board();
 
     void update(const float& dt);
     void render(sf::RenderWindow& window);
@@ -50,13 +56,16 @@ public:
     void flip();
 
     std::string computeHash(int turn_count);
-    Board decodeHash(const std::string& board_hash);
+    void loadFromHash(const std::string& board_hash);
+    void renderHash(const std::string& board_hash, sf::RenderWindow& window);
 
     BoardGeometry& getGeometry();
     bool hasPieceAt(const Position& position);
 
 private:
     void initializeBoard();
+    void copy(const Board& other);
+    void clear();
 
     void renderBoard(sf::RenderWindow& window);
     void renderTiles(sf::RenderWindow& window);
@@ -85,6 +94,8 @@ private:
     std::string computePlacementField();
     std::string computeRowPlacement(int row);
     char getPieceSymbol(const PieceType& type, const ChessColor& color);
+    PieceType typeFromSymbol(const char& symbol);
+    ChessColor colorFromSymbol(const char& symbol);
     char getActiveColor();
     std::string getCastlingRights();
     std::string getEnPassantTarget();
