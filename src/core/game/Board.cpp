@@ -751,7 +751,7 @@ bool Board::canCastle(const ChessColor& color, bool king_side) {
 	auto& king = getPieceAt(king_position);
 
 	// king not moved
-	if (king->hasMoved()) {
+	if (king->hasMoved() || king_position.row != (color == ChessColor::White ? 0 : 7)) {
 		return false;
 	}
 
@@ -760,7 +760,7 @@ bool Board::canCastle(const ChessColor& color, bool king_side) {
 	auto& rook = getPieceAt(rook_position);
 
 	// rook moved or not found in place
-	if (!rook || rook->hasMoved()) {
+	if (!rook || rook->getType() != PieceType::Rook || rook->getColor() != color || rook->hasMoved()) {
 		return false;
 	}
 
