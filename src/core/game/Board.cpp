@@ -2,10 +2,12 @@
 #include "../log/Logger.hpp"
 #include "Piece.h"
 #include "../managers/AssetManager.h"
+#include "MoveHistory.h"
 
 Board::Board() {
 	selected_piece = nullptr;
 	last_move = nullptr;
+	halfmove_clock = 0;
 	this->initializeBoard();
 }
 
@@ -46,12 +48,12 @@ Board::Board(const Board& other) {
 
 	valid_moves = other.valid_moves;
 	is_white_side = other.is_white_side;
+	halfmove_clock = other.halfmove_clock;
 
 	tile_states = other.tile_states;
 }
 
-void Board::update(const float& dt, const Move* last_move) {
-	this->last_move = last_move;
+void Board::update(const float& dt, Move* last_move) {
 	updateTileStates(dt);
 }
 
@@ -82,6 +84,19 @@ void Board::makeMove(const Move& move) {
 	valid_moves.clear();
 	
 	setPieceAt(move.to, std::move(moving_piece));
+
+	if (last_move) {
+		delete last_move;
+	}
+
+	last_move = new Move(move.from, move.to, move.taken_over);
+
+	if (getPieceAt(move.to)->getType() == PieceType::Pawn || move.taken_over) {
+		halfmove_clock = 0;
+	}
+	else {
+		halfmove_clock++;
+	}
 }
 
 void Board::undoLastMove() {
@@ -295,16 +310,24 @@ void Board::flip() {
 	is_white_side = false;
 }
 
-std::string Board::computeHash() {
+std::string Board::computeHash(int turn_count) {
 	std::string board_hash;
 	std::string placement_field = computePlacementField();
 	char active_color = getActiveColor();
 	std::string castling_rights = getCastlingRights();
+	std::string en_passant_target = getEnPassantTarget();
+	std::string halfmove_clock = std::to_string(this->halfmove_clock);
+	std::string fullmove_clock = std::to_string(turn_count / 2 + 1);
 
+	board_hash =
+		placement_field + ' ' +
+		active_color + ' ' +
+		castling_rights + ' ' +
+		en_passant_target + ' ' +
+		halfmove_clock + ' ' +
+		fullmove_clock;
 
-	board_hash = placement_field + ' ' + active_color + ' ' + castling_rights;
 	LOG_INFO('\n', "Board Hash: ", board_hash);
-
 	return board_hash;
 }
 
@@ -535,6 +558,10 @@ Position Board::getEnPassantMove(Piece* moving_piece) {
 	}
 
 	auto& last_moved_piece = getPieceAt(last_move->to);
+	if (!last_moved_piece) {
+		return invalid_move;
+	}
+	
 	ChessColor last_moved_piece_color = last_moved_piece->getColor();
 	PieceType last_moved_piece_type = last_moved_piece->getType();
 	Position last_moved_piece_position = last_moved_piece->getPosition();
@@ -745,4 +772,38 @@ std::string Board::getCastlingRights() {
 
 
 	return (castling_rights.size() == 0 ? "-" : castling_rights);
+}
+
+std::string Board::getEnPassantTarget() {
+	std::string en_passant_target = "-";
+
+	if (!last_move) {
+		return en_passant_target;
+	}
+
+	auto& last_moved_piece = getPieceAt(last_move->to);
+	if (last_moved_piece && last_moved_piece->getType() == PieceType::Pawn) {
+		int vertical_distance = abs(last_move->from.row - last_move->to.row);
+
+		if (vertical_distance == 2) {
+			en_passant_target = getAlgebraicNotation(last_move->to);
+		}
+
+	}
+
+	return en_passant_target;
+}
+
+std::string Board::getAlgebraicNotation(const Position& position) {
+	if (!isInBounds(position)) {
+		return "";
+	}
+
+	char file = char('a' + position.col);
+	char rank = char('0' + position.row + 1);
+	std::string algebraic_notation;
+	algebraic_notation.push_back(file);
+	algebraic_notation.push_back(rank);
+
+	return algebraic_notation;
 }
