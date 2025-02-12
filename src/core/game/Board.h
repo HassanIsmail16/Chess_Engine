@@ -22,7 +22,7 @@ public:
     Board();
     Board(const Board& other);
 
-    void update(const float& dt, Move* last_move);
+    void update(const float& dt);
     void render(sf::RenderWindow& window);
 
     void makeMove(const Move& move);
@@ -50,6 +50,7 @@ public:
     void flip();
 
     std::string computeHash(int turn_count);
+    Board decodeHash(const std::string& board_hash);
 
     BoardGeometry& getGeometry();
     bool hasPieceAt(const Position& position);
@@ -102,6 +103,5 @@ private:
 
     bool is_white_side; // to track board orientation
     int halfmove_clock;
-
     BoardGeometry geometry;
 };
