@@ -3,6 +3,7 @@
 #include "Piece.h"
 #include "../managers/AssetManager.h"
 #include "MoveHistory.h"
+#include "../events/EventDispatcher.h"
 
 Board::Board() {
 	selected_piece = nullptr;
@@ -96,10 +97,23 @@ void Board::makeMove(const Move& move) {
 	else {
 		halfmove_clock++;
 	}
+
 }
 
 void Board::undoLastMove() {
 	
+}
+
+void Board::promotePawn(const Position& position, const PieceType& promotion_type) {
+	auto& pawn = getPieceAt(position);
+
+	if (!pawn || pawn->getType() != PieceType::Pawn) {
+		LOG_WARNING("Attempted to promote pawn at row: ", position.row, ", col: ", position.col, " which is not a pawn");
+		return;
+	}
+
+	pawn = std::move(std::make_unique<Piece>(promotion_type, pawn->getColor(), position));
+	LOG_INFO("The pawn at row: ", position.row, ", col: ", position.col, " was promoted to a ", pawn->getPieceCode());
 }
 
 std::unique_ptr<Piece>& Board::getPieceAt(const Position& position) {
@@ -367,6 +381,24 @@ std::string Board::computeHash(int turn_count) {
 
 BoardGeometry& Board::getGeometry() {
 	return geometry;
+}
+
+bool Board::isLastMovePromotion() {
+	if (!last_move) {
+		return false;
+	}
+
+	auto& moving_piece = getPieceAt(last_move->to);
+
+	if (!moving_piece) {
+		return false;
+	}
+
+	if (moving_piece->getType() != PieceType::Pawn) {
+		return false;
+	}
+
+	return moving_piece->getColor() == ChessColor::White ? moving_piece->getPosition().row == 7 : moving_piece->getPosition().row == 0;
 }
 
 void Board::initializeBoard() {

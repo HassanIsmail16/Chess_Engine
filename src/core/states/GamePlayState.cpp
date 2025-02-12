@@ -6,6 +6,7 @@ GamePlayState::GamePlayState() {
 	board = std::make_unique<Board>();
 	history = std::make_unique<MoveHistory>();
 	status_manager = std::make_unique<GameStatusManager>();
+	promotion_panel = nullptr;
 
 	// TODO: clean up event subscriptions
 	EventDispatcher::getInstance().subscribe(EventType::MoveEvent, [&](std::shared_ptr<Event> event) {
@@ -14,6 +15,16 @@ GamePlayState::GamePlayState() {
 		board->makeMove(move);
 		history->recordMove(move, board->computeHash(history->getTotalMoves()));
 		status_manager->endTurn(*board);
+		});
+
+	EventDispatcher::getInstance().subscribe(EventType::PromotionEvent, [&](std::shared_ptr<Event> event) {
+		auto promotion_event = std::dynamic_pointer_cast<PromotionEvent>(event);
+		if (promotion_event->isResolved()) {
+			board->promotePawn(promotion_event->getMove().to, promotion_event->getPromotionType());
+			promotion_panel.release();
+		} else {
+			promotion_panel = std::make_unique<PromotionPanel>(promotion_event->getMove());
+		}
 		});
 }
 
@@ -32,14 +43,32 @@ std::string GamePlayState::getName() const {
 }
 
 void GamePlayState::update(const float& dt) {
+	if (promotion_panel) {
+		promotion_panel->update(dt);
+		return;
+	}
+
+	if (board->isLastMovePromotion()) {
+		EventDispatcher::getInstance().pushEvent(
+			std::make_shared<PromotionEvent>(history->getLastMove())
+		);
+	}
+
 	board->update(dt, nullptr);
 	return;
 }
 
 void GamePlayState::render(sf::RenderWindow& window) {
 	window.clear(sf::Color::Green);
+
+
 	board->render(window);
 	history->render(window);
+
+	if (promotion_panel) {
+		promotion_panel->render(window);
+	}
+
 	window.display();
 }
 
@@ -51,6 +80,11 @@ void GamePlayState::handleInput(const InputManager& input_manager) {
 				std::make_unique<MainMenuState>()
 			)
 		);
+	}
+
+	if (promotion_panel) {
+		promotion_panel->handleInput(input_manager);
+		return;
 	}
 
 	if (input_manager.isMouseButtonJustPressed(sf::Mouse::Button::Left)) {
