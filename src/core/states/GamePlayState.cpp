@@ -12,7 +12,7 @@ GamePlayState::GamePlayState() {
 		auto move_event = std::dynamic_pointer_cast<MoveEvent>(event);
 		auto move = move_event->getMove();
 		board->makeMove(move);
-		history->recordMove(move, board->computeHash());
+		history->recordMove(move, board->computeHash(history->getTotalMoves()));
 		status_manager->endTurn(*board);
 		});
 }
@@ -32,8 +32,7 @@ std::string GamePlayState::getName() const {
 }
 
 void GamePlayState::update(const float& dt) {
-	Move* last_move = (history->isEmpty() ? nullptr : new Move(history->getLastMove()));
-	board->update(dt, last_move);
+	board->update(dt, nullptr);
 	return;
 }
 

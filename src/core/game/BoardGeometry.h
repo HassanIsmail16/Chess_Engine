@@ -17,6 +17,9 @@ public:
 	bool isInsideBoardTiles(const sf::Vector2i& position) const;
 
 	void setMarginPercent(const float& percent);
+	
+	void flip();
+	bool isWhiteSide() const;
 
 private:
 	float margin_percent = 0.05;
@@ -29,4 +32,5 @@ private:
 	float tile_size;
 	float tile_start_x;
 	float tile_start_y;
+	bool is_white_side = true;
 };

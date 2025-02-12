@@ -6,6 +6,8 @@
 #include "../GameObject.h"
 #include <array>
 
+class MoveHistory;
+
 enum class TileState {
     None,
     Selected,
@@ -20,7 +22,7 @@ public:
     Board();
     Board(const Board& other);
 
-    void update(const float& dt, const Move* last_move);
+    void update(const float& dt, Move* last_move);
     void render(sf::RenderWindow& window);
 
     void makeMove(const Move& move);
@@ -47,7 +49,7 @@ public:
     bool isWhiteSide() const;
     void flip();
 
-    std::string computeHash() const;
+    std::string computeHash(int turn_count);
 
     BoardGeometry& getGeometry();
     bool hasPieceAt(const Position& position);
@@ -79,17 +81,26 @@ private:
 
     Position getKingPosition(const ChessColor& color);
 
+    std::string computePlacementField();
+    std::string computeRowPlacement(int row);
+    char getPieceSymbol(const PieceType& type, const ChessColor& color);
+    char getActiveColor();
+    std::string getCastlingRights();
+    std::string getEnPassantTarget();
+
+    std::string getAlgebraicNotation(const Position& position);
+
     std::array<std::array<std::unique_ptr<Piece>, 8>, 8> board;
     std::vector<std::unique_ptr<Piece>> white_captured;
     std::vector<std::unique_ptr<Piece>> black_captured;
 
     Piece* selected_piece;
     std::vector<Position> valid_moves;
-    const Move* last_move;
+    Move* last_move;
 
     std::array<std::array<TileState, 8>, 8> tile_states;
 
-    bool is_white_side; // to track board orientation
+    int halfmove_clock;
 
     BoardGeometry geometry;
 };
