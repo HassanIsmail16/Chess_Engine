@@ -92,6 +92,10 @@ const Move& MoveHistory::getLastMove() const {
 	return moves.back().move;
 }
 
+void MoveHistory::render(sf::RenderWindow& window) {
+
+}
+
 void MoveHistory::recordCastlingMove(const Move& move, const std::string& hash) {
 	bool is_king_side = move.getType() == PositionType::KingSideCastle;
 	Position rook_from(move.from.row, (is_king_side ? 7 : 0));

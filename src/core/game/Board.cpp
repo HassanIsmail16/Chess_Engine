@@ -132,7 +132,11 @@ bool Board::isKingChecked(const ChessColor& color, bool skipMoveValidation) {
 		for (int col = 0; col < 8; col++) {
 			auto& current_piece = getPieceAt(Position(row, col));
 
-			if (!current_piece || current_piece->getColor() == color) {
+			if (!current_piece) {
+				continue;
+			}
+
+			if (current_piece->getColor() == color) {
 				continue;
 			}
 
@@ -217,6 +221,31 @@ std::vector<Position> Board::getValidMoves(const std::vector<Position>& candidat
 	return valid_moves;
 }
 
+std::vector<Position> Board::getAllValidMoves(const ChessColor& color) {
+	std::vector<Position> valid_moves;
+	
+	for (int row = 0; row < 8; row++) {
+		for (int col = 0; col < 8; col++) {
+			Position current_position(row, col);
+
+			if (!hasPieceAt(current_position)) {
+				continue;
+			}
+
+			auto& current_piece = getPieceAt(current_position);
+			
+			if (current_piece->getColor() != color) {
+				continue;
+			}
+
+			auto current_valid_moves = getValidMoves(current_piece->getPossibleMoves(), current_piece.get());
+			MERGE_VECTORS(valid_moves, current_valid_moves);
+		}
+	}
+
+	return valid_moves;
+}
+
 std::vector<Position> Board::getValidPawnMoves(const std::vector<Position>& candidate_moves, Piece* moving_piece) {
 	if (!moving_piece) {
 		return std::vector<Position>{};
@@ -282,19 +311,25 @@ bool Board::isCastlingMove(const Position& position) {
 	return false;
 }
 
-const Piece* Board::getSelectedPiece() const {
+Piece* Board::getSelectedPiece() {
 	return selected_piece;
 }
 
-void Board::selectPiece(const Position& position) {
+void Board::selectPiece(const Position& position, const ChessColor& current_turn) {
+	valid_moves.clear();
+
 	selected_piece = getPieceAt(position).get();
+
 	if (!selected_piece) {
 		selected_piece = nullptr;
-		valid_moves.clear();
 		return;
 	}
+
 	LOG_INFO("A Piece of code ", selected_piece->getPieceCode(), " was selected");
-	valid_moves = getValidMoves(selected_piece->getPossibleMoves(), selected_piece);
+	
+	if (current_turn == selected_piece->getColor()) {
+		valid_moves = getValidMoves(selected_piece->getPossibleMoves(), selected_piece);
+	}
 }
 
 void Board::unselectPiece() {
@@ -558,6 +593,7 @@ Position Board::getEnPassantMove(Piece* moving_piece) {
 	}
 
 	auto& last_moved_piece = getPieceAt(last_move->to);
+
 	if (!last_moved_piece) {
 		return invalid_move;
 	}

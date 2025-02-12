@@ -5,6 +5,7 @@
 GamePlayState::GamePlayState() {
 	board = std::make_unique<Board>();
 	history = std::make_unique<MoveHistory>();
+	status_manager = std::make_unique<GameStatusManager>();
 
 	// TODO: clean up event subscriptions
 	EventDispatcher::getInstance().subscribe(EventType::MoveEvent, [&](std::shared_ptr<Event> event) {
@@ -12,6 +13,7 @@ GamePlayState::GamePlayState() {
 		auto move = move_event->getMove();
 		board->makeMove(move);
 		history->recordMove(move, board->computeHash(history->getTotalMoves()));
+		status_manager->endTurn(*board);
 		});
 }
 
@@ -37,6 +39,7 @@ void GamePlayState::update(const float& dt) {
 void GamePlayState::render(sf::RenderWindow& window) {
 	window.clear(sf::Color::Green);
 	board->render(window);
+	history->render(window);
 	window.display();
 }
 
@@ -69,8 +72,8 @@ void GamePlayState::handleInput(const InputManager& input_manager) {
 					std::make_shared<MoveEvent>(move)
 				);
 			}
-
-			board->selectPiece(selected_position);
+			
+			board->selectPiece(selected_position, status_manager->getCurrentTurn());
 		}
 	}
 }

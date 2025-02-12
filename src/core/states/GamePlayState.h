@@ -3,6 +3,7 @@
 #include "State.h"
 #include "../game/Board.h"
 #include "../game/MoveHistory.h"
+#include "../game/GameStatusManager.h"
 #include <memory>
 
 class GamePlayState : public State {
@@ -20,4 +21,5 @@ private:
 
 	std::unique_ptr<Board> board;
 	std::unique_ptr<MoveHistory> history;
+	std::unique_ptr<GameStatusManager> status_manager;
 };
