@@ -16,7 +16,7 @@ struct MoveEntry {
 
 class MoveHistory {
 public:
-	MoveHistory(Board& board);
+	MoveHistory();
 	void recordMove(const Move& move, const std::string& hash);
 	void recordMove(const MoveEntry& entry);
 	bool canUndo();
@@ -36,7 +36,6 @@ public:
 private:
 	void recordCastlingMove(const Move& move, const std::string& hash);
 	int current_index;
-	Board& board;
 	std::vector<MoveEntry> moves;
 };
 

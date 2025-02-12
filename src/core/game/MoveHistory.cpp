@@ -1,8 +1,8 @@
 #include "MoveHistory.h"
 #include "../log/Logger.hpp"
 
-MoveHistory::MoveHistory(Board& board) : board(board), current_index(0) {
-	
+MoveHistory::MoveHistory() {
+	reset();
 }
 
 void MoveHistory::recordMove(const Move& move, const std::string& hash) {
@@ -15,7 +15,8 @@ void MoveHistory::recordMove(const Move& move, const std::string& hash) {
 }
 
 void MoveHistory::recordMove(const MoveEntry& entry) {
-	if (current_index < moves.size() - 1) {
+	if (current_index < (int) moves.size() - 1) {
+		LOG_INFO("Truncating move history vector, current_index: ", current_index, ", history size: ", moves.size());
 		moves.erase(moves.begin() + current_index + 1, moves.end());
 	}
 
