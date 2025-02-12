@@ -12,48 +12,31 @@ Board::Board() {
 	this->initializeBoard();
 }
 
-Board::Board(const Board& other) {
-	for (int row = 0; row < 8; ++row) {
-		for (int col = 0; col < 8; ++col) {
-			board[row][col] = (other.board[row][col] ? other.board[row][col]->clone() : nullptr);
-		}
-	}
-
-	for (const auto& piece : other.white_captured) {
-		white_captured.emplace_back(piece->clone());
-	}
-
-	for (const auto& piece : other.black_captured) {
-		black_captured.emplace_back(piece->clone());
-	}
-
+Board::Board(const std::string& board_hash) {
 	selected_piece = nullptr;
 	last_move = nullptr;
-
-	if (other.selected_piece) {
-		Position position = other.selected_piece->getPosition();
-		selected_piece = board[position.row][position.col].get();
-	}
-
-	if (other.last_move) {
-		Position from = other.last_move->from;
-		Position to = other.last_move->to;
-		Piece* taken_over = nullptr;
-
-		if (other.last_move->taken_over) {
-			taken_over = board[to.row][to.col].get();
-		}
-
-		last_move = new Move(from, to, taken_over);
-	}
-
-	valid_moves = other.valid_moves;
-	halfmove_clock = other.halfmove_clock;
-
-	tile_states = other.tile_states;
+	halfmove_clock = 0;
+	this->initializeBoard();
+	loadFromHash(board_hash);
 }
 
-void Board::update(const float& dt, Move* last_move) {
+Board::Board(const Board& other) {
+	copy(other);
+}
+
+Board& Board::operator=(const Board& other) {
+	if (this != &other) {
+		clear();
+		copy(other);
+	}
+
+	return *this;
+}
+
+Board::~Board() {
+	clear();
+}
+void Board::update(const float& dt) {
 	updateTileStates(dt);
 }
 
@@ -367,16 +350,46 @@ std::string Board::computeHash(int turn_count) {
 	std::string halfmove_clock = std::to_string(this->halfmove_clock);
 	std::string fullmove_clock = std::to_string(turn_count / 2 + 1);
 
-	board_hash =
-		placement_field + ' ' +
-		active_color + ' ' +
-		castling_rights + ' ' +
-		en_passant_target + ' ' +
-		halfmove_clock + ' ' +
-		fullmove_clock;
+	board_hash = std::format("{} {} {} {} {} {}", 
+		placement_field, active_color,
+		castling_rights, en_passant_target,
+		halfmove_clock, fullmove_clock);
 
 	LOG_INFO('\n', "Board Hash: ", board_hash);
 	return board_hash;
+}
+
+void Board::loadFromHash(const std::string& board_hash) {
+	std::string placement_field = board_hash.substr(0, board_hash.find(' '));
+
+	LOG_INFO("Decoding: ", placement_field);
+	int row = 7, col = 0;
+	for (const char& c : placement_field) {
+		if (c == '/') {
+			row--;
+			col = 0;
+		}
+		else if (isdigit(c)) {
+			int empty_tiles = c - '0';
+
+			while (empty_tiles--) {
+				setPieceAt(Position(row, col), nullptr);
+				col++;
+			}
+
+			continue;
+		}
+		else {
+			std::unique_ptr<Piece> new_piece = std::make_unique<Piece>(typeFromSymbol(c), colorFromSymbol(c), Position(row, col));
+			setPieceAt(Position(row, col), std::move(new_piece));
+			col++;
+		}
+	}
+}
+
+void Board::renderHash(const std::string& board_hash, sf::RenderWindow& window) {
+	auto decoded_board = std::make_unique<Board>(board_hash);
+	decoded_board->render(window);
 }
 
 BoardGeometry& Board::getGeometry() {
@@ -433,6 +446,61 @@ void Board::initializeBoard() {
 	}
 
 	updateTileStates(0);
+}
+
+void Board::copy(const Board& other) {
+	for (int row = 0; row < 8; ++row) {
+		for (int col = 0; col < 8; ++col) {
+			board[row][col] = (other.board[row][col] ? other.board[row][col]->clone() : nullptr);
+		}
+	}
+
+	for (const auto& piece : other.white_captured) {
+		white_captured.emplace_back(piece->clone());
+	}
+
+	for (const auto& piece : other.black_captured) {
+		black_captured.emplace_back(piece->clone());
+	}
+
+	selected_piece = nullptr;
+	last_move = nullptr;
+
+	if (other.selected_piece) {
+		Position position = other.selected_piece->getPosition();
+		selected_piece = board[position.row][position.col].get();
+	}
+
+	if (other.last_move) {
+		Position from = other.last_move->from;
+		Position to = other.last_move->to;
+		Piece* taken_over = nullptr;
+
+		if (other.last_move->taken_over) {
+			taken_over = board[to.row][to.col].get();
+		}
+
+		last_move = new Move(from, to, taken_over);
+	}
+
+	valid_moves = other.valid_moves;
+	halfmove_clock = other.halfmove_clock;
+
+	tile_states = other.tile_states;
+}
+
+void Board::clear() {
+	for (int row = 0; row < 8; ++row) {
+		for (int col = 0; col < 8; ++col) {
+			board[row][col].reset();
+		}
+	}
+
+	white_captured.clear();
+	black_captured.clear();
+	delete last_move;
+	last_move = nullptr;
+	selected_piece = nullptr;
 }
 
 void Board::renderBoard(sf::RenderWindow& window) {
@@ -807,6 +875,26 @@ char Board::getPieceSymbol(const PieceType& type, const ChessColor& color) {
 	}
 
 	return piece_symbol;
+}
+
+PieceType Board::typeFromSymbol(const char& symbol) {
+	PieceType piece_type;
+
+	switch (std::tolower(symbol)) {
+		case 'p': piece_type = PieceType::Pawn; break;
+		case 'r': piece_type = PieceType::Rook; break;
+		case 'n': piece_type = PieceType::Knight; break;
+		case 'b': piece_type = PieceType::Bishop; break;
+		case 'q': piece_type = PieceType::Queen; break;
+		case 'k': piece_type = PieceType::King; break;
+		default: break;
+	}
+
+	return piece_type;
+}
+
+ChessColor Board::colorFromSymbol(const char& symbol) {
+	return (isupper(symbol) ? ChessColor::White : ChessColor::Black);
 }
 
 char Board::getActiveColor() {
