@@ -12,7 +12,11 @@ GamePlayState::GamePlayState() {
 		auto move_event = std::dynamic_pointer_cast<MoveEvent>(event);
 		auto move = move_event->getMove();
 		board->makeMove(move);
+<<<<<<< HEAD
 		history->recordMove(move, board->computeHash(history->getTotalMoves()));
+=======
+		history->recordMove(move, board->computeHash());
+>>>>>>> 081cf25601c6dfa4a5f1701d1cba732437b67474
 		status_manager->endTurn(*board);
 		});
 }

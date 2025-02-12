@@ -53,7 +53,16 @@ Board::Board(const Board& other) {
 	tile_states = other.tile_states;
 }
 
+<<<<<<< HEAD
 void Board::update(const float& dt, Move* last_move) {
+=======
+void Board::update(const float& dt, const Move* last_move) {
+	if (this->last_move) {
+		delete this->last_move;
+	}
+
+	this->last_move = last_move;
+>>>>>>> 081cf25601c6dfa4a5f1701d1cba732437b67474
 	updateTileStates(dt);
 }
 
@@ -597,7 +606,11 @@ Position Board::getEnPassantMove(Piece* moving_piece) {
 	if (!last_moved_piece) {
 		return invalid_move;
 	}
+<<<<<<< HEAD
 	
+=======
+
+>>>>>>> 081cf25601c6dfa4a5f1701d1cba732437b67474
 	ChessColor last_moved_piece_color = last_moved_piece->getColor();
 	PieceType last_moved_piece_type = last_moved_piece->getType();
 	Position last_moved_piece_position = last_moved_piece->getPosition();
