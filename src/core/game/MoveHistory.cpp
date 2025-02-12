@@ -92,6 +92,17 @@ const Move& MoveHistory::getLastMove() const {
 	return moves.back().move;
 }
 
+void MoveHistory::render(sf::RenderWindow& window) {
+	sf::Sprite sprite = AssetManager::getInstance().getSprite("move-history-body");
+	
+	margin = window.getSize().x * 0.05f;
+	x = margin;
+	y = margin + window.getSize().y * (0.093f + 0.172f + 0.027f);
+	sprite.setPosition(x, y);
+	
+	window.draw(sprite);
+}
+
 void MoveHistory::recordCastlingMove(const Move& move, const std::string& hash) {
 	bool is_king_side = move.getType() == PositionType::KingSideCastle;
 	Position rook_from(move.from.row, (is_king_side ? 7 : 0));
