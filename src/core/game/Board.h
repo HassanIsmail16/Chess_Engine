@@ -32,16 +32,16 @@ public:
     bool isKingChecked(const ChessColor& color, bool skipMoveValidation = false);
 
     std::vector<Position> getValidMoves(const std::vector<Position>& candidate_moves, Piece* moving_piece);
-
+    std::vector<Position> getAllValidMoves(const ChessColor& color);
     std::vector<Position> getValidPawnMoves(const std::vector<Position>& candidate_moves, Piece* moving_piece);
     
     const std::vector<std::unique_ptr<Piece>>& getCapturedPieces(const ChessColor& color) const;
 
     bool isValidMove(const Position& position);
     bool isCastlingMove(const Position& position);
-    const Piece* getSelectedPiece() const;
+    Piece* getSelectedPiece();
 
-    void selectPiece(const Position& position);
+    void selectPiece(const Position& position, const ChessColor& current_turn);
     void unselectPiece();
 
     bool isWhiteSide() const;
@@ -50,6 +50,7 @@ public:
     std::string computeHash() const;
 
     BoardGeometry& getGeometry();
+    bool hasPieceAt(const Position& position);
 
 private:
     void initializeBoard();
@@ -67,7 +68,6 @@ private:
     bool hasFriendlyPiece(const Position& position, const ChessColor& color);
     bool hasKingAt(const Position& position);
     bool isPathObstructed(const Position& from, const Position& to);
-    bool hasPieceAt(const Position& position);
     bool willExposeKing(const Position& from, const Position& to, const ChessColor& king_color);
     bool isValidPawnStep(const Position& from, const Position& to, const ChessColor& king_color);
     bool isValidPawnCapture(const Position& from, const Position& to, const ChessColor& king_color);
