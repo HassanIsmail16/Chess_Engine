@@ -335,6 +335,16 @@ bool Board::isCastlingMove(const Position& position) {
 	return false;
 }
 
+bool Board::isEnPassantMove(const Position& position) {
+	auto find_position = std::find(valid_moves.begin(), valid_moves.end(), position);
+
+	if (find_position == valid_moves.end()) {
+		return false;
+	}
+
+	return find_position->type == PositionType::EnPassant;
+}
+
 void Board::selectPiece(const Position& position, const ChessColor& current_turn) {
 	valid_moves.clear();
 
@@ -690,9 +700,20 @@ bool Board::isValidPawnCapture(const Position& from, const Position& to, const C
 	return isInBounds(to) && !willExposeKing(from, to, king_color) && hasPieceAt(to) && getPieceAt(to)->getColor() == opponent_color;
 }
 
+bool Board::canEnPassant(Piece* moving_piece) {
+	if (!moving_piece) {
+		return false;
+	}
 
-Position Board::getEnPassantMove(Piece* moving_piece) {
-	Position invalid_move = { -1, -1 };
+	if (!last_move) {
+		return false;
+	}
+
+	auto& last_moved_piece = getPieceAt(last_move->to);
+
+	if (!last_moved_piece) {
+		return false;
+	}
 
 	// moving piece data
 	ChessColor moving_piece_color = moving_piece->getColor();
@@ -700,42 +721,47 @@ Position Board::getEnPassantMove(Piece* moving_piece) {
 	Position moving_piece_position = moving_piece->getPosition();
 
 	// last moved piece data
-	if (!last_move) {
-		return invalid_move;
-	}
-
-	auto& last_moved_piece = getPieceAt(last_move->to);
-
-	if (!last_moved_piece) {
-		return invalid_move;
-	}
-
 	ChessColor last_moved_piece_color = last_moved_piece->getColor();
 	PieceType last_moved_piece_type = last_moved_piece->getType();
 	Position last_moved_piece_position = last_moved_piece->getPosition();
 
 	// The en passant capture must be performed on the turn immediately after the pawn being captured moves.
 	if (last_moved_piece_type != PieceType::Pawn || last_moved_piece_color != opponent_color) {
-		return invalid_move;
+		return false;
 	}
-	
+
 	// The captured pawn must have moved two squares in one move, landing right next to the capturing pawn.
 	int vertical_distance = abs(last_move->from.row - last_move->to.row);
 	if (vertical_distance != 2) {
-		return invalid_move;
-	} 
+		return false;
+	}
 
 	// The en passante can only be done on this row
 	int en_passant_row = (moving_piece_color == ChessColor::White ? 4 : 3);
 	if (last_moved_piece_position.row != en_passant_row || last_moved_piece_position.row != moving_piece_position.row) {
-		return invalid_move;
-	} 
+		return false;
+	}
 
 	// check if the captured pawn is directly next to the en passant pawn
 	int col_distance = abs(last_moved_piece_position.col - moving_piece_position.col);
 	if (col_distance != 1) {
+		return false;
+	}
+
+	return true;
+}
+
+
+Position Board::getEnPassantMove(Piece* moving_piece) {
+	Position invalid_move = { -1, -1 };
+
+	if (!canEnPassant(moving_piece)) {
 		return invalid_move;
-	} 
+	}
+
+	ChessColor moving_piece_color = moving_piece->getColor();
+	Position moving_piece_position = moving_piece->getPosition();
+	Position last_moved_piece_position = last_move->to;
 
 	// Calculate en passant move
 	int direction = (moving_piece_color == ChessColor::White ? 1 : -1);

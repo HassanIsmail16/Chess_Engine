@@ -51,6 +51,7 @@ public:
 
     bool isValidMove(const Position& position);
     bool isCastlingMove(const Position& position);
+    bool isEnPassantMove(const Position& position);
 
     void selectPiece(const Position& position, const ChessColor& current_turn);
     void unselectPiece();
@@ -96,6 +97,7 @@ private:
     bool willExposeKing(const Position& from, const Position& to, const ChessColor& king_color);
     bool isValidPawnStep(const Position& from, const Position& to, const ChessColor& king_color);
     bool isValidPawnCapture(const Position& from, const Position& to, const ChessColor& king_color);
+    bool canEnPassant(Piece* moving_piece);
     Position getEnPassantMove(Piece* moving_piece);
     void makeCastlingMove(const Move & king_move);
     bool canCastle(const ChessColor& color, bool king_side);

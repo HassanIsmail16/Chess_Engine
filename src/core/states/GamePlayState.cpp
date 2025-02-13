@@ -1,6 +1,7 @@
 #include "GamePlayState.h"
 #include "../events/EventDispatcher.h"
 #include "StateForward.h"
+#include "../log/Logger.hpp"
 
 GamePlayState::GamePlayState() {
 	//std::string hash = "r1bk3r/p2pBpNp/n4n2/1p1NP2P/6P1/3P4/R1P1K3/q5b1";
@@ -102,7 +103,20 @@ void GamePlayState::handleInput(const InputManager& input_manager) {
 					selected_position.type = (selected_position.col == 6 ? PositionType::KingSideCastle : PositionType::QueenSideCastle);
 				}
 
-				Move move(selected_piece->getPosition(), selected_position, board->getPieceAt(selected_position).get());
+				Piece* captured_piece = nullptr;
+				Move move;
+
+				if (board->isEnPassantMove(selected_position)) {
+					selected_position.type = PositionType::EnPassant;
+					int capture_direction = (selected_piece->getColor() == ChessColor::White ? -1 : 1);
+					Position capture_position = {selected_position.row + capture_direction, selected_position.col};
+					move = { selected_piece->getPosition(), selected_position, board->getPieceAt(capture_position).release() };
+					LOG_WARNING("En passant done!");
+				}
+				else {
+					move = { selected_piece->getPosition(), selected_position, board->getPieceAt(selected_position).get() };
+				}
+				
 				
 				EventDispatcher::getInstance().pushEvent(
 					std::make_shared<MoveEvent>(move)
