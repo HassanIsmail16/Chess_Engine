@@ -34,6 +34,7 @@ GamePlayState::GamePlayState() {
 		auto jump_to_move_event = std::dynamic_pointer_cast<JumpToMoveEvent>(event);
 		if (jump_to_move_event->getIndex() == history->getTotalMoves() - 1) {
 			board_hash = "";
+			return;
 		}
 		board_hash = jump_to_move_event->getHash();
 		});

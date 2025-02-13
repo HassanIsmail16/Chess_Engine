@@ -131,6 +131,8 @@ void MoveHistory::handleInput(const InputManager& input_manager) {
 				try {
 					jumpToMove(clicked_index);
 					
+					LOG_INFO("Jumping to move: ", clicked_index, ", number of recorded moves: ", moves.size());
+
 					EventDispatcher::getInstance().pushEvent(
 						std::make_shared<JumpToMoveEvent>(clicked_index, moves[clicked_index].board_hash)
 					);
@@ -183,9 +185,6 @@ void MoveHistory::recordCastlingMove(const Move& move, const std::string& hash) 
 std::string MoveHistory::formatMove(Move move) const {
 	std::string result;
 
-	// Add piece letter for non-pawn moves
-
-	// Add destination position
 	result += static_cast<char>('a' + move.to.col);
 	result += std::to_string(move.to.row + 1);
 
