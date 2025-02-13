@@ -60,7 +60,7 @@ void GamePlayState::update(const float& dt) {
 }
 
 void GamePlayState::render(sf::RenderWindow& window) {
-	window.clear(sf::Color::Green);
+	window.clear(sf::Color(234, 216, 203));
 
 
 	board->render(window);

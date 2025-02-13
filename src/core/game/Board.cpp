@@ -530,10 +530,15 @@ void Board::renderTileAt(sf::RenderWindow& window, const Position& position) {
 	}
 
 	float tile_scale = geometry.getTileSize() / AssetManager::getInstance().getTexture(sprite_name).getSize().x;
+	float overlay_scale = 1;
+	if (!overlay_name.empty()) {
+		overlay_scale = geometry.getTileSize() / AssetManager::getInstance().getTexture(overlay_name).getSize().x;
+	}
+	
 	sf::Vector2f tile_position = geometry.getTilePosition(position);
-
+	
 	tile_sprite.setScale(tile_scale, tile_scale);
-	overlay_sprite.setScale(tile_scale, tile_scale);
+	overlay_sprite.setScale(overlay_scale, overlay_scale);
 
 	tile_sprite.setPosition(tile_position);
 	overlay_sprite.setPosition(tile_position);
