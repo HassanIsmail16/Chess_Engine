@@ -5,6 +5,7 @@
 #include "MoveHistory.h"
 #include "../events/EventDispatcher.h"
 
+#pragma region Constructors and Destructor
 Board::Board() {
 	selected_piece = nullptr;
 	last_move = nullptr;
@@ -36,6 +37,8 @@ Board& Board::operator=(const Board& other) {
 Board::~Board() {
 	clear();
 }
+
+#pragma endregion
 void Board::update(const float& dt) {
 	updateTileStates(dt);
 }
@@ -46,6 +49,15 @@ void Board::render(sf::RenderWindow& window) {
 	renderTiles(window);
 }
 
+BoardGeometry& Board::getGeometry() {
+	return geometry;
+}
+
+void Board::flip() {
+	geometry.flip();
+}
+
+#pragma region Movement
 void Board::makeMove(const Move& move) {
 	auto& moving_piece = getPieceAt(move.from);	
 
@@ -97,6 +109,24 @@ void Board::promotePawn(const Position& position, const PieceType& promotion_typ
 
 	pawn = std::move(std::make_unique<Piece>(promotion_type, pawn->getColor(), position));
 	LOG_INFO("The pawn at row: ", position.row, ", col: ", position.col, " was promoted to a ", pawn->getPieceCode());
+}
+
+bool Board::isLastMovePromotion() {
+	if (!last_move) {
+		return false;
+	}
+
+	auto& moving_piece = getPieceAt(last_move->to);
+
+	if (!moving_piece) {
+		return false;
+	}
+
+	if (moving_piece->getType() != PieceType::Pawn) {
+		return false;
+	}
+
+	return moving_piece->getColor() == ChessColor::White ? moving_piece->getPosition().row == 7 : moving_piece->getPosition().row == 0;
 }
 
 std::unique_ptr<Piece>& Board::getPieceAt(const Position& position) {
@@ -176,7 +206,6 @@ std::vector<Position> Board::getValidMoves(const std::vector<Position>& candidat
 		return {};
 	}
 
-	std::vector<Position> valid_moves;
 	ChessColor moving_piece_color = moving_piece->getColor();
 	PieceType moving_piece_type = moving_piece->getType();
 	Position moving_piece_position = moving_piece->getPosition();
@@ -184,6 +213,8 @@ std::vector<Position> Board::getValidMoves(const std::vector<Position>& candidat
 	if (moving_piece_type == PieceType::Pawn) {
 		return getValidPawnMoves(candidate_moves, moving_piece);
 	}
+
+	std::vector<Position> valid_moves;
 
 	for (const auto& candidate_move : candidate_moves) {
 		if (!isInBounds(candidate_move) ||
@@ -285,9 +316,6 @@ std::vector<Position> Board::getValidPawnMoves(const std::vector<Position>& cand
 	return valid_pawn_moves;
 }
 
-const std::vector<std::unique_ptr<Piece>>& Board::getCapturedPieces(const ChessColor& color) const {
-	return (color == ChessColor::White ? white_captured : black_captured);
-}
 
 bool Board::isValidMove(const Position& position) {
 	return std::find(valid_moves.begin(), valid_moves.end(), position) != valid_moves.end();
@@ -295,7 +323,7 @@ bool Board::isValidMove(const Position& position) {
 
 bool Board::isCastlingMove(const Position& position) {
 	auto find_position = std::find(valid_moves.begin(), valid_moves.end(), position);
-	
+
 	if (find_position == valid_moves.end()) {
 		return false;
 	}
@@ -307,8 +335,14 @@ bool Board::isCastlingMove(const Position& position) {
 	return false;
 }
 
-Piece* Board::getSelectedPiece() {
-	return selected_piece;
+bool Board::isEnPassantMove(const Position& position) {
+	auto find_position = std::find(valid_moves.begin(), valid_moves.end(), position);
+
+	if (find_position == valid_moves.end()) {
+		return false;
+	}
+
+	return find_position->type == PositionType::EnPassant;
 }
 
 void Board::selectPiece(const Position& position, const ChessColor& current_turn) {
@@ -322,7 +356,7 @@ void Board::selectPiece(const Position& position, const ChessColor& current_turn
 	}
 
 	LOG_INFO("A Piece of code ", selected_piece->getPieceCode(), " was selected");
-	
+
 	if (current_turn == selected_piece->getColor()) {
 		valid_moves = getValidMoves(selected_piece->getPossibleMoves(), selected_piece);
 	}
@@ -333,14 +367,24 @@ void Board::unselectPiece() {
 	valid_moves.clear();
 }
 
+Piece* Board::getSelectedPiece() {
+	return selected_piece;
+}
+
+#pragma endregion
+
+bool Board::hasPieceAt(const Position& position) {
+	auto& piece = getPieceAt(position);
+	return piece != nullptr;
+}
+const std::vector<std::unique_ptr<Piece>>& Board::getCapturedPieces(const ChessColor& color) const {
+	return (color == ChessColor::White ? white_captured : black_captured);
+}
+
 bool Board::isWhiteSide() const {
 	return geometry.isWhiteSide();
 }
-
-void Board::flip() {
-	geometry.flip();
-}
-
+#pragma region FEN Hashing
 std::string Board::computeHash(int turn_count) {
 	std::string board_hash;
 	std::string placement_field = computePlacementField();
@@ -392,27 +436,7 @@ void Board::renderHash(const std::string& board_hash, sf::RenderWindow& window) 
 	decoded_board->render(window);
 }
 
-BoardGeometry& Board::getGeometry() {
-	return geometry;
-}
-
-bool Board::isLastMovePromotion() {
-	if (!last_move) {
-		return false;
-	}
-
-	auto& moving_piece = getPieceAt(last_move->to);
-
-	if (!moving_piece) {
-		return false;
-	}
-
-	if (moving_piece->getType() != PieceType::Pawn) {
-		return false;
-	}
-
-	return moving_piece->getColor() == ChessColor::White ? moving_piece->getPosition().row == 7 : moving_piece->getPosition().row == 0;
-}
+#pragma endregion
 
 void Board::initializeBoard() {
 	// white pieces
@@ -503,6 +527,7 @@ void Board::clear() {
 	selected_piece = nullptr;
 }
 
+#pragma region Rendering Helpers
 void Board::renderBoard(sf::RenderWindow& window) {
 	sf::Sprite board_frame = AssetManager::getInstance().getSprite("board-frame");
 	board_frame.setScale(geometry.getBoardScale(), geometry.getBoardScale());
@@ -616,6 +641,9 @@ TileState Board::computeTileState(const Position& position) {
 	return TileState::None;
 }
 
+#pragma endregion
+
+#pragma region Movement Helpers
 bool Board::isInBounds(const Position& position) const {
 	return position.row < 8 && position.row >= 0 && position.col < 8 && position.col >= 0;
 }
@@ -652,11 +680,6 @@ bool Board::isPathObstructed(const Position& from, const Position& to) {
 	return false;
 }
 
-bool Board::hasPieceAt(const Position& position) {
-	auto& piece = getPieceAt(position);
-	return piece != nullptr;
-}
-
 bool Board::willExposeKing(const Position& from, const Position& to, const ChessColor& king_color) {
 	// Create a temporary board copy to test if this move would expose the king
 	Board temp_board(*this);
@@ -682,9 +705,20 @@ bool Board::isValidPawnCapture(const Position& from, const Position& to, const C
 	return isInBounds(to) && !willExposeKing(from, to, king_color) && hasPieceAt(to) && getPieceAt(to)->getColor() == opponent_color;
 }
 
+bool Board::canEnPassant(Piece* moving_piece) {
+	if (!moving_piece) {
+		return false;
+	}
 
-Position Board::getEnPassantMove(Piece* moving_piece) {
-	Position invalid_move = { -1, -1 };
+	if (!last_move) {
+		return false;
+	}
+
+	auto& last_moved_piece = getPieceAt(last_move->to);
+
+	if (!last_moved_piece) {
+		return false;
+	}
 
 	// moving piece data
 	ChessColor moving_piece_color = moving_piece->getColor();
@@ -692,42 +726,47 @@ Position Board::getEnPassantMove(Piece* moving_piece) {
 	Position moving_piece_position = moving_piece->getPosition();
 
 	// last moved piece data
-	if (!last_move) {
-		return invalid_move;
-	}
-
-	auto& last_moved_piece = getPieceAt(last_move->to);
-
-	if (!last_moved_piece) {
-		return invalid_move;
-	}
-
 	ChessColor last_moved_piece_color = last_moved_piece->getColor();
 	PieceType last_moved_piece_type = last_moved_piece->getType();
 	Position last_moved_piece_position = last_moved_piece->getPosition();
 
 	// The en passant capture must be performed on the turn immediately after the pawn being captured moves.
 	if (last_moved_piece_type != PieceType::Pawn || last_moved_piece_color != opponent_color) {
-		return invalid_move;
+		return false;
 	}
-	
+
 	// The captured pawn must have moved two squares in one move, landing right next to the capturing pawn.
 	int vertical_distance = abs(last_move->from.row - last_move->to.row);
 	if (vertical_distance != 2) {
-		return invalid_move;
-	} 
+		return false;
+	}
 
 	// The en passante can only be done on this row
 	int en_passant_row = (moving_piece_color == ChessColor::White ? 4 : 3);
 	if (last_moved_piece_position.row != en_passant_row || last_moved_piece_position.row != moving_piece_position.row) {
-		return invalid_move;
-	} 
+		return false;
+	}
 
 	// check if the captured pawn is directly next to the en passant pawn
 	int col_distance = abs(last_moved_piece_position.col - moving_piece_position.col);
 	if (col_distance != 1) {
+		return false;
+	}
+
+	return true;
+}
+
+
+Position Board::getEnPassantMove(Piece* moving_piece) {
+	Position invalid_move = { -1, -1 };
+
+	if (!canEnPassant(moving_piece)) {
 		return invalid_move;
-	} 
+	}
+
+	ChessColor moving_piece_color = moving_piece->getColor();
+	Position moving_piece_position = moving_piece->getPosition();
+	Position last_moved_piece_position = last_move->to;
 
 	// Calculate en passant move
 	int direction = (moving_piece_color == ChessColor::White ? 1 : -1);
@@ -800,6 +839,10 @@ Position Board::getKingPosition(const ChessColor& color) {
 	LOG_ERROR(__FUNCTION__, " was invoked and no king was found");
 	throw std::runtime_error("No King");
 }
+
+#pragma endregion
+
+#pragma region FEN Hashing Helpers
 
 std::string Board::computePlacementField() {
 	std::string placement_field;
@@ -967,3 +1010,5 @@ std::string Board::getAlgebraicNotation(const Position& position) {
 
 	return algebraic_notation;
 }
+
+#pragma endregion

@@ -28,6 +28,7 @@ struct Move {
     Move(const Position& from, const Position& to, Piece* taken_over = nullptr): from(from), to(to), taken_over(taken_over) {}
     PositionType getType() const { return to.type; }
     bool isCastling() const { return to.type == PositionType::KingSideCastle || to.type == PositionType::QueenSideCastle;}
+    bool isEnPassant() const { return to.type == PositionType::EnPassant; }
     bool isValid() const { return from != Position(-1, -1) && to != Position(-1 - 1); }
     Position from;
     Position to;
