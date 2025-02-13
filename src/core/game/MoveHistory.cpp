@@ -100,7 +100,7 @@ void MoveHistory::render(sf::RenderWindow& window) {
 	y = margin + window.getSize().y * (0.093f + 0.172f + 0.027f);
 	sprite.setPosition(x, y);
 	
-	window.draw(sprite);
+	//window.draw(sprite);
 }
 
 void MoveHistory::recordCastlingMove(const Move& move, const std::string& hash) {
