@@ -103,7 +103,6 @@ void GamePlayState::handleInput(const InputManager& input_manager) {
 					selected_position.type = (selected_position.col == 6 ? PositionType::KingSideCastle : PositionType::QueenSideCastle);
 				}
 
-				Piece* captured_piece = nullptr;
 				Move move;
 
 				if (board->isEnPassantMove(selected_position)) {
@@ -111,7 +110,7 @@ void GamePlayState::handleInput(const InputManager& input_manager) {
 					int capture_direction = (selected_piece->getColor() == ChessColor::White ? -1 : 1);
 					Position capture_position = {selected_position.row + capture_direction, selected_position.col};
 					move = { selected_piece->getPosition(), selected_position, board->getPieceAt(capture_position).release() };
-					LOG_WARNING("En passant done!");
+					LOG_INFO("Applying En Passant");
 				}
 				else {
 					move = { selected_piece->getPosition(), selected_position, board->getPieceAt(selected_position).get() };
