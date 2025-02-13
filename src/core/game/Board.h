@@ -34,6 +34,8 @@ public:
     void makeMove(const Move& move);
     void undoLastMove();
 
+    void promotePawn(const Position& position, const PieceType& promotion_type);
+    bool isLastMovePromotion();
     std::unique_ptr<Piece>& getPieceAt(const Position& position);
     void setPieceAt(const Position& position, std::unique_ptr<Piece> new_piece);
 

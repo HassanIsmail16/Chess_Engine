@@ -12,7 +12,8 @@ enum class EventType {
 	MoveEvent,
 	UndoMoveEvent,
 	RedoMoveEvent,
-	JumpToMoveEvent
+	JumpToMoveEvent,
+	PromotionEvent
 };
 
 class Event {
@@ -78,4 +79,16 @@ public:
 
 private:
 	int index;
+};
+
+class PromotionEvent : public Event {
+public:
+	PromotionEvent(const Move& move, const PieceType& promotion_type = PieceType::Pawn) : Event(EventType::PromotionEvent), move(move), promotion_type(promotion_type) {}
+	Move getMove() { return move; }
+	PieceType getPromotionType() { return promotion_type; }
+	bool isResolved() { return promotion_type != PieceType::Pawn; }
+
+private:
+	Move move;
+	PieceType promotion_type;
 };

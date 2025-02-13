@@ -3,6 +3,7 @@
 #include "Piece.h"
 #include "../managers/AssetManager.h"
 #include "MoveHistory.h"
+#include "../events/EventDispatcher.h"
 
 Board::Board() {
 	selected_piece = nullptr;
@@ -79,10 +80,23 @@ void Board::makeMove(const Move& move) {
 	else {
 		halfmove_clock++;
 	}
+
 }
 
 void Board::undoLastMove() {
 	
+}
+
+void Board::promotePawn(const Position& position, const PieceType& promotion_type) {
+	auto& pawn = getPieceAt(position);
+
+	if (!pawn || pawn->getType() != PieceType::Pawn) {
+		LOG_WARNING("Attempted to promote pawn at row: ", position.row, ", col: ", position.col, " which is not a pawn");
+		return;
+	}
+
+	pawn = std::move(std::make_unique<Piece>(promotion_type, pawn->getColor(), position));
+	LOG_INFO("The pawn at row: ", position.row, ", col: ", position.col, " was promoted to a ", pawn->getPieceCode());
 }
 
 std::unique_ptr<Piece>& Board::getPieceAt(const Position& position) {
@@ -349,10 +363,10 @@ void Board::loadFromHash(const std::string& board_hash) {
 	std::string placement_field = board_hash.substr(0, board_hash.find(' '));
 
 	LOG_INFO("Decoding: ", placement_field);
-	int row = 0, col = 0;
+	int row = 7, col = 0;
 	for (const char& c : placement_field) {
 		if (c == '/') {
-			row++;
+			row--;
 			col = 0;
 		}
 		else if (isdigit(c)) {
@@ -380,6 +394,24 @@ void Board::renderHash(const std::string& board_hash, sf::RenderWindow& window) 
 
 BoardGeometry& Board::getGeometry() {
 	return geometry;
+}
+
+bool Board::isLastMovePromotion() {
+	if (!last_move) {
+		return false;
+	}
+
+	auto& moving_piece = getPieceAt(last_move->to);
+
+	if (!moving_piece) {
+		return false;
+	}
+
+	if (moving_piece->getType() != PieceType::Pawn) {
+		return false;
+	}
+
+	return moving_piece->getColor() == ChessColor::White ? moving_piece->getPosition().row == 7 : moving_piece->getPosition().row == 0;
 }
 
 void Board::initializeBoard() {
@@ -719,7 +751,7 @@ bool Board::canCastle(const ChessColor& color, bool king_side) {
 	auto& king = getPieceAt(king_position);
 
 	// king not moved
-	if (king->hasMoved()) {
+	if (king->hasMoved() || king_position.row != (color == ChessColor::White ? 0 : 7)) {
 		return false;
 	}
 
@@ -728,7 +760,7 @@ bool Board::canCastle(const ChessColor& color, bool king_side) {
 	auto& rook = getPieceAt(rook_position);
 
 	// rook moved or not found in place
-	if (!rook || rook->hasMoved()) {
+	if (!rook || rook->getType() != PieceType::Rook || rook->getColor() != color || rook->hasMoved()) {
 		return false;
 	}
 
