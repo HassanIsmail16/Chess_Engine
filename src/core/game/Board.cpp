@@ -17,6 +17,7 @@ Board::Board(const std::string& board_hash) {
 	selected_piece = nullptr;
 	last_move = nullptr;
 	halfmove_clock = 0;
+	//flip();
 	this->initializeBoard();
 	loadFromHash(board_hash);
 }
@@ -406,7 +407,7 @@ std::string Board::computeHash(int turn_count) {
 void Board::loadFromHash(const std::string& board_hash) {
 	std::string placement_field = board_hash.substr(0, board_hash.find(' '));
 
-	LOG_INFO("Decoding: ", placement_field);
+	//LOG_INFO("Decoding: ", placement_field);
 	int row = 7, col = 0;
 	for (const char& c : placement_field) {
 		if (c == '/') {

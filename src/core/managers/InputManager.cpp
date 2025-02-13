@@ -22,6 +22,15 @@ void InputManager::update(const sf::Event& event, const sf::RenderWindow& window
 		current_mouse_states[event.mouseButton.button] = false;
 	}
 
+	// update scroll delta
+	if (event.type == sf::Event::MouseWheelScrolled) {
+		if (event.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel) {
+			scroll_delta = event.mouseWheelScroll.delta;
+		}
+	} else {
+		scroll_delta = 0.0f;  // Reset scroll delta for non-scroll events
+	}
+
 	// update mouse position
 	current_mouse_position = sf::Mouse::getPosition(window);
 }
@@ -64,6 +73,10 @@ sf::Vector2i InputManager::getMouseDelta() const {
 	return current_mouse_position - previous_mouse_position;
 }
 
+float InputManager::getScrollDelta() const {
+	return scroll_delta;
+}
+
 bool InputManager::hasMouseMoved() const {
 	return getMouseDelta() != sf::Vector2i(0, 0);
 }
@@ -84,4 +97,6 @@ void InputManager::initializeMouseButtonStates() {
 
 void InputManager::initializeMousePositions() {
 	current_mouse_position = previous_mouse_position = sf::Vector2i(0, 0);
+	scroll_delta = 0.0f;
+	previous_scroll = 0.0f;
 }

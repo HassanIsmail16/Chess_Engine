@@ -20,6 +20,8 @@ private:
 	void render(sf::RenderWindow& window) override;
 	void handleInput(const InputManager& input_manager) override;
 	
+	std::string board_hash = "";
+
 	std::unique_ptr<PromotionPanel> promotion_panel;
 	std::unique_ptr<Board> board;
 	std::unique_ptr<MoveHistory> history;

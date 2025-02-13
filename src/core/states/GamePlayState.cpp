@@ -29,6 +29,14 @@ GamePlayState::GamePlayState() {
 			promotion_panel = std::make_unique<PromotionPanel>(promotion_event->getMove());
 		}
 		});
+
+	EventDispatcher::getInstance().subscribe(EventType::JumpToMoveEvent,[&](std::shared_ptr<Event> event) {
+		auto jump_to_move_event = std::dynamic_pointer_cast<JumpToMoveEvent>(event);
+		if (jump_to_move_event->getIndex() == history->getTotalMoves() - 1) {
+			board_hash = "";
+		}
+		board_hash = jump_to_move_event->getHash();
+		});
 }
 
 void GamePlayState::run(const float& dt, sf::RenderWindow& window, const InputManager& input_manager) {
@@ -64,8 +72,11 @@ void GamePlayState::update(const float& dt) {
 void GamePlayState::render(sf::RenderWindow& window) {
 	window.clear(sf::Color(234, 216, 203));
 
-
-	board->render(window);
+	if (board_hash != "") {
+		board->renderHash(board_hash, window);
+	} else {
+		board->render(window);
+	}
 	history->render(window);
 
 	if (promotion_panel) {
@@ -125,4 +136,6 @@ void GamePlayState::handleInput(const InputManager& input_manager) {
 			board->selectPiece(selected_position, status_manager->getCurrentTurn());
 		}
 	}
+
+	history->handleInput(input_manager);
 }

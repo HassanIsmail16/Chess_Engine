@@ -19,6 +19,7 @@ public:
 
 	sf::Vector2i getMousePosition() const;
 	sf::Vector2i getMouseDelta() const;
+	float getScrollDelta() const;
 	bool hasMouseMoved() const;
 
 private:
@@ -36,4 +37,6 @@ private:
 
 	sf::Vector2i current_mouse_position;
 	sf::Vector2i previous_mouse_position;
+	float scroll_delta;
+	float previous_scroll;
 };
