@@ -19,17 +19,22 @@ enum class TileState {
 
 class Board {
 public:
-    Board();
 
+#pragma region Constructors and Destructor
+
+    Board();
     Board(const std::string& board_hash);
     Board(const Board& other); 
-
     Board& operator=(const Board& other);
-
     ~Board();
 
+#pragma endregion
     void update(const float& dt);
     void render(sf::RenderWindow& window);
+    BoardGeometry& getGeometry();
+    void flip();
+
+#pragma region Movement
 
     void makeMove(const Move& move);
     void undoLastMove();
@@ -40,43 +45,49 @@ public:
     void setPieceAt(const Position& position, std::unique_ptr<Piece> new_piece);
 
     bool isKingChecked(const ChessColor& color, bool skipMoveValidation = false);
-
     std::vector<Position> getValidMoves(const std::vector<Position>& candidate_moves, Piece* moving_piece);
     std::vector<Position> getAllValidMoves(const ChessColor& color);
     std::vector<Position> getValidPawnMoves(const std::vector<Position>& candidate_moves, Piece* moving_piece);
-    
-    const std::vector<std::unique_ptr<Piece>>& getCapturedPieces(const ChessColor& color) const;
 
     bool isValidMove(const Position& position);
     bool isCastlingMove(const Position& position);
-    Piece* getSelectedPiece();
 
     void selectPiece(const Position& position, const ChessColor& current_turn);
     void unselectPiece();
+    Piece* getSelectedPiece();
 
+#pragma endregion
+
+    bool hasPieceAt(const Position& position);
+    const std::vector<std::unique_ptr<Piece>>& getCapturedPieces(const ChessColor& color) const;
     bool isWhiteSide() const;
-    void flip();
+
+#pragma region FEN Hashing
 
     std::string computeHash(int turn_count);
     void loadFromHash(const std::string& board_hash);
     void renderHash(const std::string& board_hash, sf::RenderWindow& window);
 
-    BoardGeometry& getGeometry();
-    bool hasPieceAt(const Position& position);
+#pragma endregion
 
 private:
     void initializeBoard();
     void copy(const Board& other);
     void clear();
 
+#pragma region Rendering Helpers
+
     void renderBoard(sf::RenderWindow& window);
     void renderTiles(sf::RenderWindow& window);
     void renderTileAt(sf::RenderWindow& window, const Position& position);
     void renderPieceAt(sf::RenderWindow& window, const Position& position);
-
     void updateTileStates(const float& dt);
     std::string getTileOverlayName(const Position& position);
     TileState computeTileState(const Position& position);
+
+#pragma endregion
+
+#pragma region Movement Helpers
 
     bool isInBounds(const Position& position) const;
     bool hasFriendlyPiece(const Position& position, const ChessColor& color);
@@ -85,13 +96,14 @@ private:
     bool willExposeKing(const Position& from, const Position& to, const ChessColor& king_color);
     bool isValidPawnStep(const Position& from, const Position& to, const ChessColor& king_color);
     bool isValidPawnCapture(const Position& from, const Position& to, const ChessColor& king_color);
-
     Position getEnPassantMove(Piece* moving_piece);
-
     void makeCastlingMove(const Move & king_move);
     bool canCastle(const ChessColor& color, bool king_side);
-
     Position getKingPosition(const ChessColor& color);
+
+#pragma endregion
+
+#pragma region FEN Hashing Helpers
 
     std::string computePlacementField();
     std::string computeRowPlacement(int row);
@@ -101,8 +113,9 @@ private:
     char getActiveColor();
     std::string getCastlingRights();
     std::string getEnPassantTarget();
-
     std::string getAlgebraicNotation(const Position& position);
+
+#pragma endregion
 
     std::array<std::array<std::unique_ptr<Piece>, 8>, 8> board;
     std::vector<std::unique_ptr<Piece>> white_captured;
