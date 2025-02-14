@@ -2,15 +2,18 @@
 #include "../managers/AssetManager.h"
 
 void BoardGeometry::update(const sf::RenderWindow& window) {
-	margin = window.getSize().x * margin_percent;
+	float window_width = window.getSize().x;
+	float window_height = window.getSize().y;
 
-	board_size = window.getSize().y - (margin * 2);
+	margin = window_width * margin_percent;
+
+	board_size = window_height - (margin * 2);
 	
 	sf::Sprite board_frame = AssetManager::getInstance().getSprite("board-frame");
 	board_frame_size = board_frame.getTexture()->getSize().x;
 	board_scale = board_size / board_frame_size;
 	
-	board_x = window.getSize().x - (board_frame_size * board_scale) - margin;
+	board_x =  margin + (0.167 * window_width);
 
 	frame_margin = board_scale * board_frame_size * 0.10f;
 	

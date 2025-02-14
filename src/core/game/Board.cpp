@@ -145,7 +145,7 @@ void Board::setPieceAt(const Position& position, std::unique_ptr<Piece> new_piec
 	}
 
 	if (!new_piece) {
-		LOG_DEBUG("Setting piece at row: ", position.row, ", col: ", position.col, " to a nullptr");
+		//LOG_DEBUG("Setting piece at row: ", position.row, ", col: ", position.col, " to a nullptr");
 	}
 
 	board[position.row][position.col] = std::move(new_piece);
@@ -406,11 +406,11 @@ std::string Board::computeHash(int turn_count) {
 void Board::loadFromHash(const std::string& board_hash) {
 	std::string placement_field = board_hash.substr(0, board_hash.find(' '));
 
-	LOG_INFO("Decoding: ", placement_field);
-	int row = 7, col = 0;
+	//LOG_INFO("Decoding: ", placement_field);
+	int row = 0, col = 0;
 	for (const char& c : placement_field) {
 		if (c == '/') {
-			row--;
+			row++;
 			col = 0;
 		}
 		else if (isdigit(c)) {

@@ -1,6 +1,8 @@
 #pragma once
 #include "BoardUtilities.h"
 #include "Board.h"
+#include "../managers/InputManager.h"
+#include "MoveHistoryGeometry.h"
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <string>
@@ -35,23 +37,23 @@ public:
 	const std::vector<MoveEntry>& getMoveHistory() const;
 	const Move& getLastMove() const;
 
+	MoveHistoryGeometry getGeometry() const;
+
 	void render(sf::RenderWindow& window);
+	void handleInput(const InputManager& input_manager);
 private:
+	void renderEntry(sf::RenderWindow& window, MoveEntry entry, const sf::Vector2f& position);
+
+	void recordCastlingMove(const Move& move, const std::string& hash);
+	std::string formatMove(Move move) const;
+	
 	void recordCastlingMove(const Move& move, const std::string& hash, const std::string& algebraic_notation);
 	int current_index;
 	std::vector<MoveEntry> moves;
 
-	float margin_percent = 0.05;
-	float margin;
-	float sprite_size;
-	float width;
-	float height;
-	float scale;
-	float x;
-	float y;
-	float frame_margin;
-	float body_size;
-	float body_start_X;
-	float body_start_y;
+	MoveHistoryGeometry geometry;
+
+	float scroll_percent = 0.0f;
+	
 };
 

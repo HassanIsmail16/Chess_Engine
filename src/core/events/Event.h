@@ -74,11 +74,12 @@ public:
 
 class JumpToMoveEvent : public Event {
 public:
-	JumpToMoveEvent(int index) : Event(EventType::JumpToMoveEvent), index(index) {}
+	JumpToMoveEvent(int index, std::string hash) : Event(EventType::JumpToMoveEvent), index(index), hash(hash) {}
 	int getIndex() const { return index; }
-
+	std::string getHash() const { return hash; }
 private:
 	int index;
+	std::string hash;
 };
 
 class PromotionEvent : public Event {
