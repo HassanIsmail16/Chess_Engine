@@ -5,13 +5,13 @@ MoveHistory::MoveHistory() {
 	reset();
 }
 
-void MoveHistory::recordMove(const Move& move, const std::string& hash) {
+void MoveHistory::recordMove(const Move& move, const std::string& hash, const std::string& algebraic_notation) {
 	if (move.isCastling()) {
-		recordCastlingMove(move, hash);
+		recordCastlingMove(move, hash, algebraic_notation);
 		return;
 	}
 
-	recordMove(MoveEntry(move, hash));
+	recordMove(MoveEntry(move, hash, algebraic_notation));
 }
 
 void MoveHistory::recordMove(const MoveEntry& entry) {
@@ -103,10 +103,10 @@ void MoveHistory::render(sf::RenderWindow& window) {
 	window.draw(sprite);
 }
 
-void MoveHistory::recordCastlingMove(const Move& move, const std::string& hash) {
+void MoveHistory::recordCastlingMove(const Move& move, const std::string& hash, const std::string& algebraic_notation) {
 	bool is_king_side = move.getType() == PositionType::KingSideCastle;
 	Position rook_from(move.from.row, (is_king_side ? 7 : 0));
 	Position rook_to(move.from.row, (is_king_side ? 5 : 3));
 	Move rook_move(rook_from, rook_to);
-	recordMove(MoveEntry(move, rook_move, hash));
+	recordMove(MoveEntry(move, rook_move, hash, algebraic_notation));
 }

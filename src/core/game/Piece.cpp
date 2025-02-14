@@ -6,7 +6,9 @@ Piece::Piece(PieceType type, ChessColor color, Position position) :
 	color(color), 
 	current_position(position), 
 	move_count(0) {
-	sprite = AssetManager::getInstance().getSprite(getPieceCode());
+	auto& texture = AssetManager::getInstance().getTexture(getPieceCode());
+	texture.setSmooth(true);
+	sprite = sf::Sprite(texture);
 }
 
 Piece::Piece(const Piece& other) : 
@@ -23,7 +25,8 @@ void Piece::update(const float& dt) {
 
 void Piece::render(sf::RenderWindow& window, const BoardGeometry& geometry) {
 	auto tile_position = geometry.getTilePosition(current_position);
-	sprite.setPosition(tile_position.x + 3, tile_position.y + 3);
+	sprite.setPosition(tile_position.x + 1.5, tile_position.y + 1.5);
+	sprite.setScale(0.9, 0.9);
 	window.draw(sprite);
 }
 

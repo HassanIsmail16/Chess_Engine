@@ -16,7 +16,7 @@ GamePlayState::GamePlayState() {
 		auto move_event = std::dynamic_pointer_cast<MoveEvent>(event);
 		auto move = move_event->getMove();
 		board->makeMove(move);
-		history->recordMove(move, board->computeHash(history->getTotalMoves()));
+		history->recordMove(move, board->computeHash(history->getTotalMoves()), board->getLastMoveAlgebraicNotation());
 		status_manager->endTurn(*board);
 		});
 
@@ -62,7 +62,7 @@ void GamePlayState::update(const float& dt) {
 }
 
 void GamePlayState::render(sf::RenderWindow& window) {
-	window.clear(sf::Color::Green);
+	window.clear(sf::Color(234, 216, 203));
 
 
 	board->render(window);

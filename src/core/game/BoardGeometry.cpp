@@ -12,7 +12,7 @@ void BoardGeometry::update(const sf::RenderWindow& window) {
 	
 	board_x = window.getSize().x - (board_frame_size * board_scale) - margin;
 
-	frame_margin = board_scale * board_frame_size * 0.040f;
+	frame_margin = board_scale * board_frame_size * 0.10f;
 	
 	tile_size = (board_size - frame_margin * 2) / 8;
 

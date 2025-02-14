@@ -63,6 +63,8 @@ public:
     const std::vector<std::unique_ptr<Piece>>& getCapturedPieces(const ChessColor& color) const;
     bool isWhiteSide() const;
 
+    std::string getLastMoveAlgebraicNotation();
+
 #pragma region FEN Hashing
 
     std::string computeHash(int turn_count);
@@ -115,7 +117,9 @@ private:
     char getActiveColor();
     std::string getCastlingRights();
     std::string getEnPassantTarget();
-    std::string getAlgebraicNotation(const Position& position);
+    std::string positionToAlgebraicNotation(const Position& position);
+    Position getOtherPiecePosition(Piece* moving_piece);
+    std::string getDisambiguation(const Position& target, const Position& other);
 
 #pragma endregion
 

@@ -555,10 +555,15 @@ void Board::renderTileAt(sf::RenderWindow& window, const Position& position) {
 	}
 
 	float tile_scale = geometry.getTileSize() / AssetManager::getInstance().getTexture(sprite_name).getSize().x;
+	float overlay_scale = 1;
+	if (!overlay_name.empty()) {
+		overlay_scale = geometry.getTileSize() / AssetManager::getInstance().getTexture(overlay_name).getSize().x;
+	}
+	
 	sf::Vector2f tile_position = geometry.getTilePosition(position);
-
+	
 	tile_sprite.setScale(tile_scale, tile_scale);
-	overlay_sprite.setScale(tile_scale, tile_scale);
+	overlay_sprite.setScale(overlay_scale, overlay_scale);
 
 	tile_sprite.setPosition(tile_position);
 	overlay_sprite.setPosition(tile_position);
@@ -984,7 +989,7 @@ std::string Board::getEnPassantTarget() {
 		int vertical_distance = abs(last_move->from.row - last_move->to.row);
 
 		if (vertical_distance == 2) {
-			en_passant_target = getAlgebraicNotation(last_move->to);
+			en_passant_target = positionToAlgebraicNotation(last_move->to);
 		}
 
 	}
@@ -992,7 +997,7 @@ std::string Board::getEnPassantTarget() {
 	return en_passant_target;
 }
 
-std::string Board::getAlgebraicNotation(const Position& position) {
+std::string Board::positionToAlgebraicNotation(const Position& position) {
 	if (!isInBounds(position)) {
 		return "";
 	}
@@ -1004,6 +1009,135 @@ std::string Board::getAlgebraicNotation(const Position& position) {
 	algebraic_notation.push_back(rank);
 
 	return algebraic_notation;
+}
+
+// TODO: clean up this method
+std::string Board::getLastMoveAlgebraicNotation() {
+	if (!last_move) {
+		LOG_ERROR("Trying to get Algebraic Notation of a null move");
+		return "";
+	}
+	// TODO: fix castling move isn't being recorded
+	// Castling
+	if (last_move->to.type == PositionType::KingSideCastle) {
+		return "O-O";
+	}
+	else if (last_move->to.type == PositionType::QueenSideCastle) {
+		return "O-O-O";
+	}
+
+	auto& moving_piece = getPieceAt(last_move->to);
+	if (!moving_piece) {
+		LOG_ERROR("Trying to retrieve a null piece");
+		return "";
+	}
+
+	ChessColor moving_piece_color = moving_piece->getColor();
+	PieceType moving_piece_type = moving_piece->getType();
+	Position moving_piece_position = moving_piece->getPosition();
+	ChessColor opponent_color = (moving_piece_color == ChessColor::White ? ChessColor::Black : ChessColor::White);
+
+	std::string algebraic_notation = positionToAlgebraicNotation(moving_piece_position);
+	char piece_symbol = toupper(getPieceSymbol(moving_piece_type, moving_piece_color));
+
+	// Pawn Promotion
+	if (isLastMovePromotion()) {
+		algebraic_notation.push_back('=');
+		algebraic_notation.push_back(piece_symbol); // TODO: fix retrieving promotion piece
+	}
+
+	// Piece Capture
+	if (last_move->taken_over) {
+		algebraic_notation = 'x' + algebraic_notation;
+		
+		// Pawn Capture / En Passant
+		if (moving_piece_type == PieceType::Pawn || 
+			PositionType::EnPassant == moving_piece_position.type ||
+			isLastMovePromotion()) {
+			Position capturing_pawn_position = last_move->from;
+			char captureing_pawn_file = char('a' + capturing_pawn_position.col);;
+			algebraic_notation = captureing_pawn_file + algebraic_notation;
+		}
+	}
+
+	algebraic_notation = (moving_piece_type != PieceType::Pawn ? piece_symbol + algebraic_notation : algebraic_notation);
+
+	// Check if two Pieces of the same type attack this position
+	if (moving_piece_type != PieceType::Pawn &&
+		moving_piece_type != PieceType::King) {
+
+		Position other_piece_position = getOtherPiecePosition(moving_piece.get());
+		if (isInBounds(other_piece_position)) {
+			auto& other_piece = getPieceAt(other_piece_position);
+			std::vector<Position> other_piece_moves = getValidMoves(other_piece->getPossibleMoves(), other_piece.get());
+			LOG_DEBUG("found other piece");
+
+			// TODO: fix the similar move isn't valid because it has a friendly piece
+			if (find(other_piece_moves.begin(), other_piece_moves.end(), last_move->to) != other_piece_moves.end()) {
+				algebraic_notation.insert(1, getDisambiguation(last_move->from, other_piece_position));
+				LOG_DEBUG("Found similar move");
+			}
+		}
+	}
+
+	
+	if (isKingChecked(opponent_color, true)) {
+		// Checkmate
+		if (getAllValidMoves(opponent_color).empty()) {
+			algebraic_notation.push_back('#');
+		}
+		// Normal Check
+		else {
+			algebraic_notation.push_back('+');
+		}
+	}
+
+	if (PositionType::EnPassant == moving_piece_position.type) {
+		algebraic_notation += " e.p.";
+	}
+
+	LOG_WARNING("Last Move Algebraic Notation: ", algebraic_notation);
+	return algebraic_notation;
+}
+
+Position Board::getOtherPiecePosition(Piece* moving_piece) {
+	Position moving_piece_position = moving_piece->getPosition();
+	PieceType moving_piece_type = moving_piece->getType();
+	ChessColor moving_piece_color = moving_piece->getColor();
+
+	for (int row = 0; row < 8; ++row) {
+		for (int col = 0; col < 8; ++col) {
+			Position current_position = { row, col };
+			auto& current_piece = getPieceAt(current_position);
+
+			if (!current_piece) {
+				continue;
+			}
+			
+			// Found the friendly piece of the same type
+			if (current_position != moving_piece_position &&
+				current_piece->getColor() == moving_piece_color &&
+				current_piece->getType() == moving_piece_type) {
+				return current_position;
+			}
+		}
+	}
+
+	return {-1, -1};
+}
+
+std::string Board::getDisambiguation(const Position& target, const Position& other) {
+	std::string target_position = positionToAlgebraicNotation(target);
+	std::string disambiguation;
+	
+	if (target.col != other.col) {
+		disambiguation = std::string(1, target_position[0]);
+	}
+	else if (target.row != other.row) {
+		disambiguation = std::string(1, target_position[1]);
+	}
+
+	return disambiguation;
 }
 
 #pragma endregion

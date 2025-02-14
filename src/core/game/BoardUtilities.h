@@ -18,6 +18,8 @@ struct Position {
     Position(const int& row = -1, const int& col = -1, const PositionType& type = PositionType::Regular): row(row), col(col), type(type) {}
     bool operator==(const Position& other) { return row == other.row && col == other.col; }
     bool operator==(const Position& other) const { return row == other.row && col == other.col; }
+    bool operator!=(const Position& other) { return row != other.row || col != other.col; }
+    bool operator!=(const Position& other) const { return row != other.row || col != other.col; }
     int row;
     int col;
     PositionType type;
