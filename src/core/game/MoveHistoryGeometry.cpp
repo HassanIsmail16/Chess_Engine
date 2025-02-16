@@ -6,21 +6,24 @@ void MoveHistoryGeometry::update(const sf::RenderWindow& window, const float& sc
     float window_height = static_cast<float>(window.getSize().y);
     
     margin = window_width * margin_percent;
-    sf::Sprite panel = AssetManager::getInstance().getSprite("move-history-panel");
-    body_scale = panel.getScale();
+    sf::Sprite panel = AssetManager::getInstance().getSprite("move-history");
+    float panel_width = panel.getTexture()->getSize().x;
+	float panel_height = panel.getTexture()->getSize().y;
     // TODO: make it dynamically scaled
-    body_width = panel.getTexture()->getSize().x;
-    body_height = (body_width * body_scale.y) / body_scale.x;
+    body_scale = panel.getScale();
+    body_width = window_width * 0.261f;
+    body_height = (body_width * panel_height) / panel_width;
+	body_scale = sf::Vector2f(body_width / panel_width, body_height / panel_height);
     body_x = window_width - (margin + body_width);
     body_y = margin + window_height * 0.19167f;
     
-    entry_start_x = body_x + window_width * 0.046875f;
-    entry_start_y = body_y + window_height * 0.04167f;
-    entry_spacing = window_height * 0.0138f;
-    entry_width = window_width * 0.09375f;
-    entry_height = window_height * 0.051388f;
-    visible_height = window_height * 0.2638f;
-    
+    entry_start_x = body_x + (0.21257f * body_width);
+    entry_start_y = body_y + (0.1185f * body_height);
+    entry_width = body_width * 0.27f;
+    entry_height = body_height * 0.0915f;
+    entry_spacing = entry_height * 0.133f;
+    visible_height = getEntryAreaHeight();
+
     this->scroll_percent = std::clamp(scroll_percent, 0.0f, 1.0f);
     this->entry_count = std::max(0, entry_count);
     
@@ -30,13 +33,14 @@ void MoveHistoryGeometry::update(const sf::RenderWindow& window, const float& sc
 }
 
 sf::Vector2f MoveHistoryGeometry::getEntryPosition(const int& index) const {
-    if (!isEntryVisible(index) || index < 0 || index >= entry_count) {
+    if (index < 0 || index >= entry_count) {
         return sf::Vector2f(-1.0f, -1.0f);
     }
     
     float entry_x = (index % 2 == 0) ? entry_start_x : entry_start_x + entry_width;
     float scrolled_offset = total_height * scroll_percent;
-    float entry_y = entry_start_y + (index * (entry_height + entry_spacing)) - scrolled_offset;
+    int row_index = index / 2;
+    float entry_y = entry_start_y + (row_index * entry_height) + (std::max(row_index, 0) * entry_spacing) - scrolled_offset;
     
     return sf::Vector2f(entry_x, entry_y);
 }
@@ -65,12 +69,13 @@ bool MoveHistoryGeometry::isEntryVisible(const int& index) const {
     if (index < 0 || index >= entry_count) {
         return false;
     }
-    
+
     float scrolled_offset = total_height * scroll_percent;
-    float entry_y = entry_start_y + (index * (entry_height + entry_spacing)) - scrolled_offset;
-    
-    return entry_y >= entry_start_y - entry_height && 
-           entry_y <= entry_start_y + visible_height;
+    int row_index = index / 2;
+    int entry_y = entry_start_y + (row_index * entry_height) + (std::max(row_index, 0) * entry_spacing) - scrolled_offset;
+    int entry_x = entry_start_x + (index % 2 == 0 ? 2 : 1) * entry_width;
+
+    return isInsideEntryRegion({entry_x, entry_y});
 }
 
 float MoveHistoryGeometry::getEntryWidth() const {
@@ -85,6 +90,38 @@ sf::Vector2f MoveHistoryGeometry::getBodyScale() const {
 	return body_scale;
 }
 
+sf::Vector2f MoveHistoryGeometry::getEntryScale() const {
+    auto sprite = AssetManager::getInstance().getSprite("blue-button");
+    return {
+        entry_width / sprite.getTexture()->getSize().x,
+        entry_height / sprite.getTexture()->getSize().y
+    };
+}
+
+float MoveHistoryGeometry::getBodyWidth() const {
+    return body_width;
+}
+
+float MoveHistoryGeometry::getBodyHeight() const {
+    return body_height;
+}
+
+float MoveHistoryGeometry::getEntryAreaWidth() const {
+    return 0.5928f * body_width;
+}
+
+float MoveHistoryGeometry::getEntryAreaHeight() const {
+    return 0.67f * body_height;
+}
+
+float MoveHistoryGeometry::getEntryAreaX() const {
+    return body_x + (0.1856f * body_width);
+}
+
+float MoveHistoryGeometry::getEntryAreaY() const {
+    return body_y + (0.104f * body_height);
+}
+
 float MoveHistoryGeometry::getBodyX() const {
 	return body_x;
 }
@@ -95,6 +132,18 @@ float MoveHistoryGeometry::getBodyY() const {
 
 float MoveHistoryGeometry::getMargin() const {
 	return margin;
+}
+
+float MoveHistoryGeometry::getEntryX() const {
+    return entry_start_x;
+}
+
+float MoveHistoryGeometry::getTotalHeight() const {
+    return total_height;
+}
+
+float MoveHistoryGeometry::getScrollOffset() const {
+    return total_height * scroll_percent;
 }
 
 bool MoveHistoryGeometry::isInsideBody(const sf::Vector2i& position) const {

@@ -67,6 +67,8 @@ void MoveHistory::jumpToNextMove() {
 void MoveHistory::reset() {
 	current_index = 0;
 	moves.clear();
+	view = nullptr;
+	mask = nullptr;
 }
 
 int MoveHistory::getCurrentMoveIndex() {
@@ -101,17 +103,39 @@ MoveHistoryGeometry MoveHistory::getGeometry() const {
 void MoveHistory::render(sf::RenderWindow& window) {
 	geometry.update(window, scroll_percent, moves.size());
 
-	sf::Sprite panel = AssetManager::getInstance().getSprite("move-history-panel");
-	panel.setPosition(geometry.getBodyX(), geometry.getBodyY());
-	panel.setScale(geometry.getBodyScale());
-	window.draw(panel);
-
-	for (int i = 0; i < moves.size(); ++i) {
-		sf::Vector2f position = geometry.getEntryPosition(i);
-		if (position.x >= 0 && position.y >= 0) {
-			renderEntry(window, moves[i], position);
-		}
+	if (!view || !mask) {
+		initializeView(window);
 	}
+
+	sf::Sprite body = AssetManager::getInstance().getSprite("move-history");
+	body.setScale(geometry.getBodyScale());
+	body.setPosition(geometry.getBodyX(), geometry.getBodyY());
+	window.draw(body);
+
+	mask->clear(sf::Color::Transparent);
+
+	float offsetX = geometry.getEntryAreaX();
+	float offsetY = geometry.getEntryAreaY();
+
+	for (int i = 0; i < moves.size(); i++) {
+		sf::Vector2f windowPos = geometry.getEntryPosition(i);
+
+		sf::Vector2f maskPos(
+			windowPos.x - offsetX,
+			windowPos.y - offsetY
+		);
+
+		renderEntry(moves[i], maskPos, i);
+	}
+	mask->display();
+
+	sf::Sprite mask_sprite(mask->getTexture());
+	mask_sprite.setPosition(
+		geometry.getEntryAreaX(),
+		geometry.getEntryAreaY()
+	);
+
+	window.draw(mask_sprite);
 }
 
 void MoveHistory::handleInput(const InputManager& input_manager) {
@@ -119,7 +143,7 @@ void MoveHistory::handleInput(const InputManager& input_manager) {
 		return;
 	}
 
-	float scroll_amount = input_manager.getScrollDelta() * 0.1f;
+	float scroll_amount = input_manager.getScrollDelta() * 0.002f;
 	if (scroll_amount != 0.0f) {
 		scroll_percent = std::clamp(scroll_percent - scroll_amount, 0.0f, 1.0f);
 	}
@@ -131,8 +155,6 @@ void MoveHistory::handleInput(const InputManager& input_manager) {
 				try {
 					jumpToMove(clicked_index);
 					
-					LOG_INFO("Jumping to move: ", clicked_index, ", number of recorded moves: ", moves.size());
-
 					EventDispatcher::getInstance().pushEvent(
 						std::make_shared<JumpToMoveEvent>(clicked_index, moves[clicked_index].board_hash)
 					);
@@ -145,33 +167,36 @@ void MoveHistory::handleInput(const InputManager& input_manager) {
 	}
 }
 
-void MoveHistory::renderEntry(sf::RenderWindow& window, MoveEntry entry, const sf::Vector2f& position) {
-	sf::Text move_text;
-	move_text.setFont(AssetManager::getInstance().getFont("main-font"));
-	move_text.setCharacterSize(static_cast<unsigned int>(geometry.getEntryHeight() * 0.6f));
-	move_text.setFillColor(sf::Color::Black);
+void MoveHistory::renderEntry(MoveEntry entry, const sf::Vector2f& position, int index) {
+	std::string sprite_name = (index % 2 == 0 ? "blue-button" : "red-button");
+	
+	sf::Sprite sprite = AssetManager::getInstance().getSprite(sprite_name);
+	sprite.setScale(geometry.getEntryScale());
+	sprite.setPosition(position);
 
-	std::string move_str = formatMove(entry.move);
-	if (entry.isCastling()) {
-		move_str = entry.move.to.type == PositionType::KingSideCastle ? "O-O" : "O-O-O";
-	}
-	move_text.setString(move_str);
 
-	sf::FloatRect text_bounds = move_text.getLocalBounds();
-	move_text.setPosition(
-		position.x + (geometry.getEntryWidth() - text_bounds.width) / 2,
-		position.y + (geometry.getEntryHeight() - text_bounds.height) / 2
+	sf::Color font_color = (index % 2 == 0 ? sf::Color(105, 150, 179), sf::Color(179, 111, 105));
+	
+
+	mask->draw(sprite);
+}
+
+void MoveHistory::initializeView(sf::RenderWindow& window) {
+	geometry.update(window, scroll_percent, moves.size());
+
+	sf::Vector2f entry_area_bounds(
+		geometry.getEntryAreaWidth(),
+		geometry.getEntryAreaHeight()
 	);
 
-	if (moves.size() > current_index && &entry == &moves[current_index]) {
-		sf::RectangleShape highlight;
-		highlight.setSize(sf::Vector2f(geometry.getEntryWidth(), geometry.getEntryHeight()));
-		highlight.setPosition(position);
-		highlight.setFillColor(sf::Color(255, 255, 0, 128));
-		window.draw(highlight);
-	}
+	// initialize view
+	view = std::make_unique<sf::View>();
+	view->setSize(entry_area_bounds);
+	view->setCenter(entry_area_bounds.x / 2, entry_area_bounds.y / 2);
 
-	window.draw(move_text);
+	// initialize mask
+	mask = std::make_unique<sf::RenderTexture>();
+	mask->create(entry_area_bounds.x, entry_area_bounds.y);
 }
 
 void MoveHistory::recordCastlingMove(const Move& move, const std::string& hash) {

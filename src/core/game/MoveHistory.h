@@ -41,8 +41,8 @@ public:
 	void render(sf::RenderWindow& window);
 	void handleInput(const InputManager& input_manager);
 private:
-	void renderEntry(sf::RenderWindow& window, MoveEntry entry, const sf::Vector2f& position);
-
+	void renderEntry(MoveEntry entry, const sf::Vector2f& position, int index);
+	void initializeView(sf::RenderWindow& window);
 	void recordCastlingMove(const Move& move, const std::string& hash);
 	std::string formatMove(Move move) const;
 	
@@ -52,6 +52,7 @@ private:
 	MoveHistoryGeometry geometry;
 
 	float scroll_percent = 0.0f;
-	
+	std::unique_ptr<sf::View> view;
+	std::unique_ptr<sf::RenderTexture> mask;
 };
 

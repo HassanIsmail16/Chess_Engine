@@ -13,10 +13,19 @@ public:
 	float getEntryWidth() const;
 	float getEntryHeight() const;
 	sf::Vector2f getBodyScale() const;
+    sf::Vector2f getEntryScale() const;
+    float getBodyWidth() const;
+    float getBodyHeight() const;
+    float getEntryAreaWidth() const;
+    float getEntryAreaHeight() const;
+    float getEntryAreaX() const;
+    float getEntryAreaY() const;
 	float getBodyX() const;
 	float getBodyY() const;
 	float getMargin() const;
-
+    float getEntryX() const;
+    float getTotalHeight() const;
+    float getScrollOffset() const;
 	bool isInsideBody(const sf::Vector2i& position) const;
 	bool isInsideEntryRegion(const sf::Vector2i& position) const;
 	void setMarginPercent(const float& percent);

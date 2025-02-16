@@ -13,7 +13,7 @@ void BoardGeometry::update(const sf::RenderWindow& window) {
 	board_frame_size = board_frame.getTexture()->getSize().x;
 	board_scale = board_size / board_frame_size;
 	
-	board_x =  margin + (0.167 * window_width);
+	board_x = margin + (0.19375f * window_width) - (0.0125f * window_width);
 
 	frame_margin = board_scale * board_frame_size * 0.10f;
 	
