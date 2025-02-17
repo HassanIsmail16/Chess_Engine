@@ -114,7 +114,7 @@ void MoveHistory::render(sf::RenderWindow& window) {
 
 	mask->clear(sf::Color::Transparent);
 
-	float offsetX = geometry.getEntryAreaX();
+	float offsetX = geometry.getEntryAreaX() - geometry.getBodyWidth() * 0.1287f;
 	float offsetY = geometry.getEntryAreaY();
 
 	for (int i = 0; i < moves.size(); i++) {
@@ -131,8 +131,8 @@ void MoveHistory::render(sf::RenderWindow& window) {
 
 	sf::Sprite mask_sprite(mask->getTexture());
 	mask_sprite.setPosition(
-		geometry.getEntryAreaX(),
-		geometry.getEntryAreaY()
+		offsetX,
+		offsetY
 	);
 
 	window.draw(mask_sprite);
@@ -174,11 +174,48 @@ void MoveHistory::renderEntry(MoveEntry entry, const sf::Vector2f& position, int
 	sprite.setScale(geometry.getEntryScale());
 	sprite.setPosition(position);
 
-
-	sf::Color font_color = (index % 2 == 0 ? sf::Color(105, 150, 179), sf::Color(179, 111, 105));
-	
-
 	mask->draw(sprite);
+
+	sf::Font font = AssetManager::getInstance().getFont("main-font");
+	float entry_text_font_size = geometry.getEntryWidth() * 0.1f;
+	sf::Color entry_text_font_color = (index % 2 == 0 ? sf::Color(145, 190, 219) : sf::Color(219, 151, 145));
+	
+	sf::Text entry_text(entry.algebraic_notation, font, entry_text_font_size);
+	auto entry_text_bounds = entry_text.getLocalBounds();
+	auto sprite_bounds = sprite.getGlobalBounds();
+
+	float entry_text_x = sprite_bounds.left + (sprite_bounds.width - entry_text_bounds.width) / 2.0f - entry_text_bounds.left;
+	float entry_text_y = sprite_bounds.top + (sprite_bounds.height * 0.87 - entry_text_bounds.height) / 2.0f - entry_text_bounds.top;
+	
+	entry_text.setColor(entry_text_font_color);
+	entry_text.setPosition(entry_text_x, entry_text_y);
+
+	mask->draw(entry_text);
+	
+	float entry_number_font_size = geometry.getEntryWidth() * 0.14f;
+	sf::Color entry_number_font_color(194, 127, 89);
+
+	std::string entry_number = std::to_string((index / 2) + 1);
+	
+	float offsetX = geometry.getEntryAreaX() - geometry.getBodyWidth() * 0.1287f;
+	float right_shift = geometry.getBodyWidth() * 0.042f;
+	
+	float right_shift_factor;
+	if (entry_number.size() == 1) {
+		right_shift_factor = 1;
+	} else if (entry_number.size() == 2) {
+		right_shift_factor = 0.5;
+	} else {
+		right_shift_factor = 0;
+	}
+
+	float entry_number_x = (geometry.getBodyX() + geometry.getBodyWidth() * 0.06f) - offsetX + right_shift_factor * right_shift;
+
+	sf::Text entry_number_text(entry_number, font, entry_number_font_size);
+	entry_number_text.setColor(entry_number_font_color);
+	entry_number_text.setPosition(entry_number_x, entry_text_y);
+
+	mask->draw(entry_number_text);
 }
 
 void MoveHistory::initializeView(sf::RenderWindow& window) {
@@ -189,14 +226,24 @@ void MoveHistory::initializeView(sf::RenderWindow& window) {
 		geometry.getEntryAreaHeight()
 	);
 
+	float left_shift_x = geometry.getBodyWidth() * 0.1287f;
+
 	// initialize view
 	view = std::make_unique<sf::View>();
-	view->setSize(entry_area_bounds);
-	view->setCenter(entry_area_bounds.x / 2, entry_area_bounds.y / 2);
+	view->setSize(
+		sf::Vector2f(
+			entry_area_bounds.x + left_shift_x,
+			entry_area_bounds.y
+		)
+	);
+	view->setCenter((left_shift_x + entry_area_bounds.x) / 2, entry_area_bounds.y / 2);
 
 	// initialize mask
 	mask = std::make_unique<sf::RenderTexture>();
-	mask->create(entry_area_bounds.x, entry_area_bounds.y);
+	mask->create(
+		entry_area_bounds.x + left_shift_x,
+		entry_area_bounds.y
+	);
 }
 
 void MoveHistory::recordCastlingMove(const Move& move, const std::string& hash, const std::string& algebraic_notation) {
