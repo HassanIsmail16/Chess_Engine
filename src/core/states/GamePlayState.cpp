@@ -4,9 +4,9 @@
 #include "../log/Logger.hpp"
 
 GamePlayState::GamePlayState() {
-	//std::string hash = "r1bk3r/p2pBpNp/n4n2/1p1NP2P/6P1/3P4/R1P1K3/q5b1";
-	//board = std::make_unique<Board>(hash);
-	board = std::make_unique<Board>();
+	std::string hash = "2R2k2/Q7/1p6/3P1B1p/1p2P3/6P1/PP3P1K/8 b - - 6 34";
+	board = std::make_unique<Board>(hash);
+	//board = std::make_unique<Board>();
 	history = std::make_unique<MoveHistory>();
 	status_manager = std::make_unique<GameStatusManager>();
 	promotion_panel = nullptr;
@@ -16,7 +16,7 @@ GamePlayState::GamePlayState() {
 		auto move_event = std::dynamic_pointer_cast<MoveEvent>(event);
 		auto move = move_event->getMove();
 		board->makeMove(move);
-		history->recordMove(move, board->computeHash(history->getTotalMoves()));
+		history->recordMove(move, board->computeHash(history->getTotalMoves()), board->getLastMoveAlgebraicNotation());
 		status_manager->endTurn(*board);
 		});
 
