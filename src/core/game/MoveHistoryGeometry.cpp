@@ -9,7 +9,7 @@ void MoveHistoryGeometry::update(const sf::RenderWindow& window, const float& sc
     sf::Sprite panel = AssetManager::getInstance().getSprite("move-history");
     float panel_width = panel.getTexture()->getSize().x;
 	float panel_height = panel.getTexture()->getSize().y;
-    // TODO: make it dynamically scaled
+
     body_scale = panel.getScale();
     body_width = window_width * 0.261f;
     body_height = (body_width * panel_height) / panel_width;
@@ -22,14 +22,36 @@ void MoveHistoryGeometry::update(const sf::RenderWindow& window, const float& sc
     entry_width = body_width * 0.27f;
     entry_height = body_height * 0.0915f;
     entry_spacing = entry_height * 0.133f;
-    visible_height = getEntryAreaHeight();
 
-    this->scroll_percent = std::clamp(scroll_percent, 0.0f, 1.0f);
     this->entry_count = std::max(0, entry_count);
-    
-    total_height = entry_count > 0 ? 
-        entry_count * entry_height + (entry_count - 1) * entry_spacing : 
+    float row_count = entry_count / 2 + (entry_count % 2);
+
+    total_height = row_count > 0 ? 
+        row_count * entry_height + (row_count - 1) * entry_spacing :
         0.0f;
+
+    visible_height = getEntryAreaHeight();
+    this->scroll_percent = std::clamp(scroll_percent, 0.0f, 1.0f);
+    max_scroll_percent = std::max(0.0f, (total_height - visible_height) / total_height);
+
+    housing_height = 0.6274f * body_height;
+    min_knob_height = 0.1146f * housing_height;
+    max_knob_height = 0.9483f * housing_height;
+    knob_height = std::clamp(max_knob_height * (visible_height / total_height), min_knob_height, max_knob_height);
+    knob_width = 0.0695f * body_width;
+    knob_x = body_x + 0.817f * body_width;
+    knob_start_y = body_y + 0.1764f * body_height;
+    float knob_travel = 0.9375f * housing_height - knob_height;
+    knob_y = (scroll_percent != 0 ? (knob_start_y) + knob_travel * (scroll_percent / max_scroll_percent) : knob_start_y);
+
+    auto upper_knob_texture = AssetManager::getInstance().getTexture("knob-up");
+    auto middle_knob_texture = AssetManager::getInstance().getTexture("knob-center");
+    auto lower_knob_texture = AssetManager::getInstance().getTexture("knob-down");
+
+    upper_knob_part_height = (knob_width * upper_knob_texture.getSize().y) / upper_knob_texture.getSize().x;
+    lower_knob_part_height = (knob_width * lower_knob_texture.getSize().y) / lower_knob_texture.getSize().x;
+    middle_knob_part_height = std::max(0.f, knob_height - (upper_knob_part_height + lower_knob_part_height));
+
 }
 
 sf::Vector2f MoveHistoryGeometry::getEntryPosition(const int& index) const {
@@ -84,6 +106,10 @@ float MoveHistoryGeometry::getEntryWidth() const {
 
 float MoveHistoryGeometry::getEntryHeight() const {
 	return entry_height;
+}
+
+float MoveHistoryGeometry::getEntrySpacing() const {
+    return entry_spacing;
 }
 
 sf::Vector2f MoveHistoryGeometry::getBodyScale() const {
@@ -142,11 +168,70 @@ float MoveHistoryGeometry::getTotalHeight() const {
     return total_height;
 }
 
+float MoveHistoryGeometry::getVisibleHeight() const {
+    return visible_height;
+}
+
 float MoveHistoryGeometry::getScrollOffset() const {
     return total_height * scroll_percent;
 }
 
+float MoveHistoryGeometry::getMaxScrollPercent() const {
+    return max_scroll_percent;
+}
+
+float MoveHistoryGeometry::getMinKnobHeight() const {
+    return min_knob_height;
+}
+
+float MoveHistoryGeometry::getMaxKnobHeight() const {
+    return max_knob_height;
+}
+
+float MoveHistoryGeometry::getFullKnobHeight() const {
+    return knob_height;
+}
+
+float MoveHistoryGeometry::getUpperKnobHeight() const {
+    return upper_knob_part_height;
+}
+
+float MoveHistoryGeometry::getMiddleKnobHeight() const {
+    return middle_knob_part_height;
+}
+
+float MoveHistoryGeometry::getLowerKnobHeight() const {
+    return lower_knob_part_height;
+}
+
+float MoveHistoryGeometry::getKnobStartY() const {
+    return knob_start_y;
+}
+
+float MoveHistoryGeometry::getKnobY() const {
+    return knob_y;
+}
+
+float MoveHistoryGeometry::getKnobX() const {
+    return knob_x;
+}
+
+float MoveHistoryGeometry::getScrollHousingHeight() const {
+    return housing_height;
+}
+
+float MoveHistoryGeometry::getKnobWidth() const {
+    return knob_width;
+}
+
 bool MoveHistoryGeometry::isInsideBody(const sf::Vector2i& position) const {
+    return position.x >= body_x &&
+        position.x <= body_x + body_width &&
+        position.y >= body_y &&
+        position.y <= body_y + body_height;
+}
+
+bool MoveHistoryGeometry::isInsideBody(const sf::Vector2f& position) const {
     return position.x >= body_x &&
         position.x <= body_x + body_width &&
         position.y >= body_y &&

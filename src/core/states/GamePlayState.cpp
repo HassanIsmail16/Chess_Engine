@@ -5,8 +5,8 @@
 
 GamePlayState::GamePlayState() {
 	std::string hash = "2R2k2/Q7/1p6/3P1B1p/1p2P3/6P1/PP3P1K/8 b - - 6 34";
-	board = std::make_unique<Board>(hash);
-	//board = std::make_unique<Board>();
+	//board = std::make_unique<Board>(hash);
+	board = std::make_unique<Board>();
 	history = std::make_unique<MoveHistory>();
 	status_manager = std::make_unique<GameStatusManager>();
 	promotion_panel = nullptr;

@@ -23,6 +23,10 @@ void MoveHistory::recordMove(const MoveEntry& entry) {
 
 	moves.push_back(entry);
 	current_index++;
+
+	if (current_index > 12) {
+		scroll_sync_pending = true;
+	}
 }
 
 bool MoveHistory::canUndo() {
@@ -118,14 +122,18 @@ void MoveHistory::render(sf::RenderWindow& window) {
 	float offsetY = geometry.getEntryAreaY();
 
 	for (int i = 0; i < moves.size(); i++) {
-		sf::Vector2f windowPos = geometry.getEntryPosition(i);
+		sf::Vector2f window_position = geometry.getEntryPosition(i);
 
-		sf::Vector2f maskPos(
-			windowPos.x - offsetX,
-			windowPos.y - offsetY
+		if (!geometry.isInsideBody(window_position)) {
+			continue;
+		}
+
+		sf::Vector2f mas_position(
+			window_position.x - offsetX,
+			window_position.y - offsetY
 		);
 
-		renderEntry(moves[i], maskPos, i);
+		renderEntry(moves[i], mas_position, i);
 	}
 	mask->display();
 
@@ -136,6 +144,8 @@ void MoveHistory::render(sf::RenderWindow& window) {
 	);
 
 	window.draw(mask_sprite);
+
+	renderScrollBar(window);
 }
 
 void MoveHistory::handleInput(const InputManager& input_manager) {
@@ -143,9 +153,9 @@ void MoveHistory::handleInput(const InputManager& input_manager) {
 		return;
 	}
 
-	float scroll_amount = input_manager.getScrollDelta() * 0.002f;
+	float scroll_amount = input_manager.getScrollDelta() * 0.005f;
 	if (scroll_amount != 0.0f) {
-		scroll_percent = std::clamp(scroll_percent - scroll_amount, 0.0f, 1.0f);
+		scroll_percent = std::clamp(scroll_percent - scroll_amount, 0.0f, geometry.getMaxScrollPercent());
 	}
 
 	if (input_manager.isMouseButtonJustPressed(sf::Mouse::Left)) {
@@ -218,6 +228,93 @@ void MoveHistory::renderEntry(MoveEntry entry, const sf::Vector2f& position, int
 	mask->draw(entry_number_text);
 }
 
+void MoveHistory::renderScrollBar(sf::RenderWindow& window) {
+	renderScrollBarArrows(window);
+	renderScrollBarKnob(window);
+}
+
+void MoveHistory::renderScrollBarArrows(sf::RenderWindow& window) {
+	float body_width = geometry.getBodyWidth();
+	float body_height = geometry.getBodyHeight();
+
+	float arrow_x = geometry.getBodyX() + 0.824f * body_width;
+	float up_arrow_y = geometry.getBodyY() + 0.1f * body_height;
+	float down_arrow_y = geometry.getBodyY() + body_height - (body_height * 0.197f);
+
+	float arrow_width = body_width * 0.054;
+	float arrow_height = body_height * 0.039f;
+	
+	sf::Sprite up_arrow_sprite = AssetManager::getInstance().getSprite("up-scroll-arrow");
+	sf::Sprite down_arrow_sprite = AssetManager::getInstance().getSprite("down-scroll-arrow");
+
+	sf::Vector2f arrow_scale(
+		arrow_width / up_arrow_sprite.getTexture()->getSize().x,
+		arrow_height / up_arrow_sprite.getTexture()->getSize().y
+	);
+
+	up_arrow_sprite.setScale(arrow_scale);
+	down_arrow_sprite.setScale(arrow_scale);
+
+	up_arrow_sprite.setPosition(arrow_x, up_arrow_y);
+	down_arrow_sprite.setPosition(arrow_x, down_arrow_y);
+
+	window.draw(up_arrow_sprite);
+	window.draw(down_arrow_sprite);
+}
+
+void MoveHistory::renderScrollBarKnob(sf::RenderWindow& window) {
+	if (scroll_sync_pending) {
+		scroll_percent = geometry.getMaxScrollPercent();
+		scroll_sync_pending = false;
+	}
+
+	float total_height = geometry.getTotalHeight();
+	float visible_height = geometry.getVisibleHeight();
+	float scroll_offset = geometry.getScrollOffset();
+	
+	float housing_height = geometry.getScrollHousingHeight();
+	float min_knob_height = geometry.getMinKnobHeight();
+	float max_knob_height = geometry.getMaxKnobHeight();
+	float knob_height = geometry.getFullKnobHeight();
+	float knob_x = geometry.getKnobX();
+	float knob_y = geometry.getKnobY();
+
+	float knob_width = geometry.getKnobWidth();
+	float upper_part_height = geometry.getUpperKnobHeight();
+	float lower_part_height = geometry.getLowerKnobHeight();
+	float middle_part_height = geometry.getMiddleKnobHeight();
+
+	sf::Sprite upper_part = AssetManager::getInstance().getSprite("knob-up");
+	sf::Sprite lower_part = AssetManager::getInstance().getSprite("knob-down");
+	sf::Sprite middle_part = AssetManager::getInstance().getSprite("knob-center");
+
+	upper_part.setScale(
+		knob_width / upper_part.getTexture()->getSize().x,
+		upper_part_height / upper_part.getTexture()->getSize().y
+	);
+
+	middle_part.setScale(
+		knob_width / middle_part.getTexture()->getSize().x,
+		middle_part_height / middle_part.getTexture()->getSize().y
+	);
+
+	lower_part.setScale(
+		knob_width / lower_part.getTexture()->getSize().x,
+		lower_part_height / lower_part.getTexture()->getSize().y
+	);
+
+	upper_part.setPosition(knob_x, knob_y);
+	knob_y += upper_part_height;
+	middle_part.setPosition(knob_x, knob_y);
+	knob_y += middle_part_height;
+	lower_part.setPosition(knob_x, knob_y);
+
+	window.draw(upper_part);
+	window.draw(middle_part);
+	window.draw(lower_part);
+
+}
+
 void MoveHistory::initializeView(sf::RenderWindow& window) {
 	geometry.update(window, scroll_percent, moves.size());
 
@@ -242,7 +339,7 @@ void MoveHistory::initializeView(sf::RenderWindow& window) {
 	mask = std::make_unique<sf::RenderTexture>();
 	mask->create(
 		entry_area_bounds.x + left_shift_x,
-		entry_area_bounds.y
+		entry_area_bounds.y + 0.009f * window.getSize().y
 	);
 }
 
@@ -252,13 +349,4 @@ void MoveHistory::recordCastlingMove(const Move& move, const std::string& hash, 
 	Position rook_to(move.from.row, (is_king_side ? 5 : 3));
 	Move rook_move(rook_from, rook_to);
 	recordMove(MoveEntry(move, rook_move, hash, algebraic_notation));
-}
-
-std::string MoveHistory::formatMove(Move move) const {
-	std::string result;
-
-	result += static_cast<char>('a' + move.to.col);
-	result += std::to_string(move.to.row + 1);
-
-	return result;
 }

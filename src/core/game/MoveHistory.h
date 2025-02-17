@@ -43,16 +43,18 @@ public:
 	void handleInput(const InputManager& input_manager);
 private:
 	void renderEntry(MoveEntry entry, const sf::Vector2f& position, int index);
+	void renderScrollBar(sf::RenderWindow& window);
+	void renderScrollBarArrows(sf::RenderWindow& window);
+	void renderScrollBarKnob(sf::RenderWindow& window);
+
 	void initializeView(sf::RenderWindow& window);
-	void recordCastlingMove(const Move& move, const std::string& hash);
-	std::string formatMove(Move move) const;
 	
 	void recordCastlingMove(const Move& move, const std::string& hash, const std::string& algebraic_notation);
 	int current_index;
 	std::vector<MoveEntry> moves;
 
 	MoveHistoryGeometry geometry;
-
+	bool scroll_sync_pending = false;
 	float scroll_percent = 0.0f;
 	std::unique_ptr<sf::View> view;
 	std::unique_ptr<sf::RenderTexture> mask;
