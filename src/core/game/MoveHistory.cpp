@@ -202,11 +202,15 @@ void MoveHistory::renderEntry(MoveEntry entry, const sf::Vector2f& position, int
 
 	mask->draw(entry_text);
 	
-	float entry_number_font_size = geometry.getEntryWidth() * 0.14f;
+	float entry_number_font_size = geometry.getEntryWidth() * 0.16f;
 	sf::Color entry_number_font_color(194, 127, 89);
 
 	std::string entry_number = std::to_string((index / 2) + 1);
 	
+	if (index % 2) {
+		return;
+	}
+
 	float offsetX = geometry.getEntryAreaX() - geometry.getBodyWidth() * 0.1287f;
 	float right_shift = geometry.getBodyWidth() * 0.042f;
 	
@@ -216,7 +220,7 @@ void MoveHistory::renderEntry(MoveEntry entry, const sf::Vector2f& position, int
 	} else if (entry_number.size() == 2) {
 		right_shift_factor = 0.5;
 	} else {
-		right_shift_factor = 0;
+		right_shift_factor = 0.08;
 	}
 
 	float entry_number_x = (geometry.getBodyX() + geometry.getBodyWidth() * 0.06f) - offsetX + right_shift_factor * right_shift;
