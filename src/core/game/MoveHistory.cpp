@@ -233,7 +233,7 @@ void MoveHistory::renderEntry(MoveEntry entry, const sf::Vector2f& position, int
 
 	mask->draw(sprite);
 
-	sf::Font font = AssetManager::getInstance().getFont("main-font");
+	sf::Font& font = AssetManager::getInstance().getFont("main-font");
 	float entry_text_font_size = geometry.getEntryWidth() * 0.1f;
 	sf::Color entry_text_font_color = (index % 2 == 0 ? sf::Color(145, 190, 219) : sf::Color(219, 151, 145));
 	
