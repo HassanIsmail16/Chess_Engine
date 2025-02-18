@@ -28,7 +28,7 @@ void InputManager::update(const sf::Event& event, const sf::RenderWindow& window
 			scroll_delta = event.mouseWheelScroll.delta;
 		}
 	} else {
-		scroll_delta = 0.0f;  // Reset scroll delta for non-scroll events
+		scroll_delta = 0.0f;
 	}
 
 	// update mouse position
@@ -39,6 +39,7 @@ void InputManager::endFrame() {
 	previous_key_states = current_key_states;
 	previous_mouse_states = current_mouse_states;
 	previous_mouse_position = current_mouse_position;
+	scroll_delta = 0.0f;
 }
 
 bool InputManager::isKeyJustPressed(const sf::Keyboard::Key& key) const {

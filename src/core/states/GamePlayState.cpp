@@ -66,6 +66,8 @@ void GamePlayState::update(const float& dt) {
 		);
 	}
 
+	history->update(dt);
+
 	board->update(dt);
 	return;
 }

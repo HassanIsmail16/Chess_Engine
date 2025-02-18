@@ -52,6 +52,20 @@ void MoveHistoryGeometry::update(const sf::RenderWindow& window, const float& sc
     lower_knob_part_height = (knob_width * lower_knob_texture.getSize().y) / lower_knob_texture.getSize().x;
     middle_knob_part_height = std::max(0.f, knob_height - (upper_knob_part_height + lower_knob_part_height));
 
+    arrow_x = body_x + 0.824f * body_width;
+    up_arrow_y = body_y + 0.1f * body_height;
+    down_arrow_y = body_y + body_height - (body_height * 0.197f);
+
+    arrow_width = body_width * 0.054f;
+    arrow_height = body_height * 0.039f;
+
+    sf::Sprite arrow_sprite = AssetManager::getInstance().getSprite("up-scroll-arrow");
+
+    // TODO: revisit this scaling
+    arrow_scale = sf::Vector2f(
+        arrow_width / arrow_sprite.getTexture()->getSize().x,
+        arrow_height / arrow_sprite.getTexture()->getSize().y
+    );
 }
 
 sf::Vector2f MoveHistoryGeometry::getEntryPosition(const int& index) const {
@@ -224,6 +238,30 @@ float MoveHistoryGeometry::getKnobWidth() const {
     return knob_width;
 }
 
+float MoveHistoryGeometry::getArrowX() const {
+    return arrow_x;
+}
+
+float MoveHistoryGeometry::getUpArrowY() const {
+    return up_arrow_y;
+}
+
+float MoveHistoryGeometry::getDownArrowY() const {
+    return down_arrow_y;
+}
+
+float MoveHistoryGeometry::getArrowWidth() const {
+    return arrow_width;
+}
+
+float MoveHistoryGeometry::getArrowHeight() const {
+    return arrow_height;
+}
+
+sf::Vector2f MoveHistoryGeometry::getArrowScale() const {
+    return arrow_scale;
+}
+
 bool MoveHistoryGeometry::isInsideBody(const sf::Vector2i& position) const {
     return position.x >= body_x &&
         position.x <= body_x + body_width &&
@@ -243,6 +281,33 @@ bool MoveHistoryGeometry::isInsideEntryRegion(const sf::Vector2i& position) cons
         position.x <= entry_start_x + (entry_width * 2) &&
         position.y >= entry_start_y &&
         position.y <= entry_start_y + visible_height;
+}
+
+bool MoveHistoryGeometry::isAboveScrollBarKnob(const sf::Vector2i& position) const {
+    return isInsideScrollBarHousing(position) && position.y < knob_y;
+}
+
+bool MoveHistoryGeometry::isInsideScrollBarKnob(const sf::Vector2i& position) const {
+    return isInsideScrollBarHousing(position) && !isAboveScrollBarKnob(position) && !isBelowScrollBarKnob(position);
+}
+
+bool MoveHistoryGeometry::isBelowScrollBarKnob(const sf::Vector2i& position) const {
+    return isInsideScrollBarHousing(position) && position.y > (knob_y + knob_height);
+}
+
+bool MoveHistoryGeometry::isInsideScrollBarHousing(const sf::Vector2i position) const {
+    return position.x >= knob_x && position.x <= knob_x + knob_width
+        && position.y >= knob_start_y && position.y <= knob_start_y + max_knob_height;
+}
+
+bool MoveHistoryGeometry::isInsideUpperArrow(const sf::Vector2i& position) const {
+    return position.x >= arrow_x && position.x <= arrow_x + arrow_width
+        && position.y >= up_arrow_y && position.y <= up_arrow_y + arrow_height;
+}
+
+bool MoveHistoryGeometry::isInsideLowerArrow(const sf::Vector2i& position) const {
+    return position.x >= arrow_x && position.x <= arrow_x + arrow_width
+        && position.y >= down_arrow_y && position.y <= down_arrow_y + arrow_height;
 }
 
 void MoveHistoryGeometry::setMarginPercent(const float& percent) {

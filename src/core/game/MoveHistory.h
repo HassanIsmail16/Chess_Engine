@@ -39,6 +39,7 @@ public:
 
 	MoveHistoryGeometry getGeometry() const;
 
+	void update(const float& dt);
 	void render(sf::RenderWindow& window);
 	void handleInput(const InputManager& input_manager);
 private:
@@ -46,6 +47,8 @@ private:
 	void renderScrollBar(sf::RenderWindow& window);
 	void renderScrollBarArrows(sf::RenderWindow& window);
 	void renderScrollBarKnob(sf::RenderWindow& window);
+
+	void scroll(const float& scroll_amount);
 
 	void initializeView(sf::RenderWindow& window);
 	
@@ -56,7 +59,14 @@ private:
 	MoveHistoryGeometry geometry;
 	bool scroll_sync_pending = false;
 	float scroll_percent = 0.0f;
+	float scroll_velocity;
+	float scroll_damping_factor = 3.0f;
+	float dt = 1.0f;
+	bool is_dragging = false;
+	float drag_start_y = 0.0f;
+
 	std::unique_ptr<sf::View> view;
 	std::unique_ptr<sf::RenderTexture> mask;
+	bool geometry_initialized = false;
 };
 

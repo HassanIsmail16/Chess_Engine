@@ -40,10 +40,22 @@ public:
     float getKnobX() const;
     float getScrollHousingHeight() const;
     float getKnobWidth() const;
+    float getArrowX() const;
+    float getUpArrowY() const;
+    float getDownArrowY() const;
+    float getArrowWidth() const;
+    float getArrowHeight() const;
+    sf::Vector2f getArrowScale() const;
 	bool isInsideBody(const sf::Vector2i& position) const;
     bool isInsideBody(const sf::Vector2f& position) const;
 	bool isInsideEntryRegion(const sf::Vector2i& position) const;
-	void setMarginPercent(const float& percent);
+    bool isAboveScrollBarKnob(const sf::Vector2i& position) const;
+    bool isInsideScrollBarKnob(const sf::Vector2i& position) const;
+    bool isBelowScrollBarKnob(const sf::Vector2i& position) const;
+    bool isInsideScrollBarHousing(const sf::Vector2i position) const;
+    bool isInsideUpperArrow(const sf::Vector2i& position) const;
+    bool isInsideLowerArrow(const sf::Vector2i& position) const;
+    void setMarginPercent(const float& percent);
 
 private:
     float margin_percent = 0.05f;
@@ -73,7 +85,11 @@ private:
     float upper_knob_part_height;
     float lower_knob_part_height;
     float middle_knob_part_height;
-    
-
+    float arrow_x;
+    float up_arrow_y;
+    float down_arrow_y;
+    float arrow_width;
+    float arrow_height;
+    sf::Vector2f arrow_scale;
     int entry_count = 0;
 };
